@@ -1,0 +1,1497 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-08-04",
+  "description": "Bosch model number prefix dictionary for SKU extraction",
+  "prefixes": [
+    {
+      "prefix": "SMS",
+      "product_family": "Dishwashers (freestanding)",
+      "expected_category": "ماشین ظرفشویی",
+      "confidence": "high",
+      "examples": ["SMS46MI20M", "SMS8ZDI86M", "SMS6ZCW85M"],
+      "nabkade_count": 29,
+      "torob_count": 150,
+      "status": "active"
+    },
+    {
+      "prefix": "SMV",
+      "product_family": "Dishwashers (built-in)",
+      "expected_category": "ماشین ظرفشویی توکار",
+      "confidence": "high",
+      "examples": ["SMV8ZDX86M", "SMV4HMX65Q"],
+      "nabkade_count": 7,
+      "torob_count": 50,
+      "status": "active"
+    },
+    {
+      "prefix": "SPV",
+      "product_family": "Dishwashers (compact built-in)",
+      "expected_category": "ماشین ظرفشویی توکار",
+      "confidence": "high",
+      "examples": ["SPV4HMX65Q", "SPV2IKX54Q"],
+      "nabkade_count": 6,
+      "torob_count": 20,
+      "status": "active"
+    },
+    {
+      "prefix": "SPS",
+      "product_family": "Dishwashers (compact freestanding)",
+      "expected_category": "ماشین ظرفشویی",
+      "confidence": "high",
+      "examples": ["SPS2HMI54Q"],
+      "nabkade_count": 2,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "SMD",
+      "product_family": "Dishwashers (built-in)",
+      "expected_category": "ماشین ظرفشویی توکار",
+      "confidence": "high",
+      "examples": ["SMD8TCX04E"],
+      "nabkade_count": 1,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "SRS",
+      "product_family": "Dishwashers",
+      "expected_category": "ماشین ظرفشویی",
+      "confidence": "high",
+      "examples": ["SRS45TI38E"],
+      "nabkade_count": 0,
+      "torob_count": 15,
+      "status": "active"
+    },
+    {
+      "prefix": "SRV",
+      "product_family": "Dishwashers",
+      "expected_category": "ماشین ظرفشویی",
+      "confidence": "high",
+      "examples": ["SRV45TI38E"],
+      "nabkade_count": 0,
+      "torob_count": 15,
+      "status": "active"
+    },
+    {
+      "prefix": "SMI",
+      "product_family": "Dishwashers",
+      "expected_category": "ماشین ظرفشویی",
+      "confidence": "high",
+      "examples": ["SMI4EVS11E"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "SHE",
+      "product_family": "Dishwashers",
+      "expected_category": "ماشین ظرفشویی",
+      "confidence": "high",
+      "examples": ["SHS65E02EU"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "SHV",
+      "product_family": "Dishwashers",
+      "expected_category": "ماشین ظرفشویی",
+      "confidence": "high",
+      "examples": ["SHV68T53EU"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "SHX",
+      "product_family": "Dishwashers",
+      "expected_category": "ماشین ظرفشویی",
+      "confidence": "high",
+      "examples": ["SHX7EM55EU"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "WAW",
+      "product_family": "Washing machines",
+      "expected_category": "ماشین لباسشویی",
+      "confidence": "high",
+      "examples": ["WAW28560BY", "WAW28562AE"],
+      "nabkade_count": 0,
+      "torob_count": 120,
+      "status": "active"
+    },
+    {
+      "prefix": "WAJ",
+      "product_family": "Washing machines",
+      "expected_category": "ماشین لباسشویی",
+      "confidence": "high",
+      "examples": ["WAJ2017SME"],
+      "nabkade_count": 0,
+      "torob_count": 80,
+      "status": "active"
+    },
+    {
+      "prefix": "WGA",
+      "product_family": "Washing machines",
+      "expected_category": "ماشین لباسشویی",
+      "confidence": "high",
+      "examples": ["WGA244AXGC", "WGA244A0ME"],
+      "nabkade_count": 0,
+      "torob_count": 30,
+      "status": "active"
+    },
+    {
+      "prefix": "WGB",
+      "product_family": "Washing machines",
+      "expected_category": "ماشین لباسشویی",
+      "confidence": "high",
+      "examples": ["WGB244Z0ME"],
+      "nabkade_count": 0,
+      "torob_count": 20,
+      "status": "active"
+    },
+    {
+      "prefix": "WAS",
+      "product_family": "Washing machines",
+      "expected_category": "ماشین لباسشویی",
+      "confidence": "high",
+      "examples": ["WAS2846XME"],
+      "nabkade_count": 0,
+      "torob_count": 15,
+      "status": "active"
+    },
+    {
+      "prefix": "WLM",
+      "product_family": "Washing machines",
+      "expected_category": "ماشین لباسشویی",
+      "confidence": "high",
+      "examples": ["WLM24400ME"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "WLB",
+      "product_family": "Washing machines",
+      "expected_category": "ماشین لباسشویی",
+      "confidence": "high",
+      "examples": ["WLB24461ME"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "WAE",
+      "product_family": "Washing machines",
+      "expected_category": "ماشین لباسشویی",
+      "confidence": "high",
+      "examples": ["WAE28165ME"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "WOT",
+      "product_family": "Washing machines",
+      "expected_category": "ماشین لباسشویی",
+      "confidence": "high",
+      "examples": ["WOT20240ME"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "WOV",
+      "product_family": "Washing machines",
+      "expected_category": "ماشین لباسشویی",
+      "confidence": "high",
+      "examples": ["WOV28360ME"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "WLS",
+      "product_family": "Washing machines",
+      "expected_category": "ماشین لباسشویی",
+      "confidence": "high",
+      "examples": ["WLS2846SME"],
+      "nabkade_count": 1,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "WNC",
+      "product_family": "Washer-dryers",
+      "expected_category": "خشک کن",
+      "confidence": "high",
+      "examples": ["WNC254A0ME"],
+      "nabkade_count": 1,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "WAN",
+      "product_family": "Washing machines",
+      "expected_category": "ماشین لباسشویی",
+      "confidence": "high",
+      "examples": ["WAN2420XME"],
+      "nabkade_count": 1,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "WQG",
+      "product_family": "Dryers",
+      "expected_category": "خشک کن",
+      "confidence": "high",
+      "examples": ["WQG1420AME"],
+      "nabkade_count": 2,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "WQB",
+      "product_family": "Dryers",
+      "expected_category": "خشک کن",
+      "confidence": "high",
+      "examples": ["WQB245BXME"],
+      "nabkade_count": 0,
+      "torob_count": 15,
+      "status": "active"
+    },
+    {
+      "prefix": "WTW",
+      "product_family": "Dryers",
+      "expected_category": "خشک کن",
+      "confidence": "high",
+      "examples": ["WTW87560ME"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "WTV",
+      "product_family": "Dryers",
+      "expected_category": "خشک کن",
+      "confidence": "high",
+      "examples": ["WTV87660ME"],
+      "nabkade_count": 0,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "KDN",
+      "product_family": "Refrigerators",
+      "expected_category": "یخچال و فریزر",
+      "confidence": "high",
+      "examples": ["KDN56XI304", "KDN55NLE0N"],
+      "nabkade_count": 0,
+      "torob_count": 50,
+      "status": "active"
+    },
+    {
+      "prefix": "KGN",
+      "product_family": "Refrigerators",
+      "expected_category": "یخچال و فریزر",
+      "confidence": "high",
+      "examples": ["KGN86AI304", "KGN39XW30U"],
+      "nabkade_count": 10,
+      "torob_count": 80,
+      "status": "active"
+    },
+    {
+      "prefix": "KGV",
+      "product_family": "Refrigerators",
+      "expected_category": "یخچال و فریزر",
+      "confidence": "high",
+      "examples": ["KGV36VL30M"],
+      "nabkade_count": 0,
+      "torob_count": 40,
+      "status": "active"
+    },
+    {
+      "prefix": "KGD",
+      "product_family": "Refrigerators",
+      "expected_category": "یخچال و فریزر",
+      "confidence": "high",
+      "examples": ["KGD86AW304", "KGD86AI304"],
+      "nabkade_count": 4,
+      "torob_count": 20,
+      "status": "active"
+    },
+    {
+      "prefix": "KGP",
+      "product_family": "Refrigerators",
+      "expected_category": "یخچال و فریزر",
+      "confidence": "high",
+      "examples": ["KGP86FWC0N", "KGP86FIC0N"],
+      "nabkade_count": 5,
+      "torob_count": 15,
+      "status": "active"
+    },
+    {
+      "prefix": "KSV",
+      "product_family": "Refrigerators",
+      "expected_category": "یخچال و فریزر",
+      "confidence": "high",
+      "examples": ["KSV36VL30U", "KSV36VW31U"],
+      "nabkade_count": 3,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "KWK",
+      "product_family": "Built-in refrigerators",
+      "expected_category": "یخچال توکار",
+      "confidence": "high",
+      "examples": ["KWK36ABGA", "KWK16ABGB"],
+      "nabkade_count": 2,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "KFI",
+      "product_family": "Refrigerators",
+      "expected_category": "یخچال و فریزر",
+      "confidence": "high",
+      "examples": ["KFI96AXEA", "KFI96APEAG"],
+      "nabkade_count": 2,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "KUW",
+      "product_family": "Built-in refrigerators",
+      "expected_category": "یخچال توکار",
+      "confidence": "high",
+      "examples": ["KUW21AHG0"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "KAG",
+      "product_family": "Side-by-side refrigerators",
+      "expected_category": "یخچال فریزر ساید بای ساید",
+      "confidence": "high",
+      "examples": ["KAG90AI20N"],
+      "nabkade_count": 1,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "KUR",
+      "product_family": "Built-in refrigerators",
+      "expected_category": "یخچال توکار",
+      "confidence": "high",
+      "examples": ["KUR21VFE0"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "KBN",
+      "product_family": "Refrigerators",
+      "expected_category": "یخچال و فریزر",
+      "confidence": "high",
+      "examples": ["KBN96ADD0"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "KDD",
+      "product_family": "Refrigerators",
+      "expected_category": "یخچال و فریزر",
+      "confidence": "high",
+      "examples": ["KDD86AI304"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "KIN",
+      "product_family": "Refrigerators",
+      "expected_category": "یخچال و فریزر",
+      "confidence": "high",
+      "examples": ["KIN85VS30"],
+      "nabkade_count": 0,
+      "torob_count": 20,
+      "status": "active"
+    },
+    {
+      "prefix": "KIR",
+      "product_family": "Built-in refrigerators",
+      "expected_category": "یخچال توکار",
+      "confidence": "high",
+      "examples": ["KIR81AF30M"],
+      "nabkade_count": 0,
+      "torob_count": 15,
+      "status": "active"
+    },
+    {
+      "prefix": "KIS",
+      "product_family": "Built-in refrigerators",
+      "expected_category": "یخچال توکار",
+      "confidence": "high",
+      "examples": ["KIS87AF30"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "GIN",
+      "product_family": "Built-in freezers",
+      "expected_category": "فریزر توکار",
+      "confidence": "high",
+      "examples": ["GIN81AE30M"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "GSN",
+      "product_family": "Freezers",
+      "expected_category": "فریزر",
+      "confidence": "high",
+      "examples": ["GSN36VLFP"],
+      "nabkade_count": 0,
+      "torob_count": 20,
+      "status": "active"
+    },
+    {
+      "prefix": "GSD",
+      "product_family": "Freezers",
+      "expected_category": "فریزر",
+      "confidence": "high",
+      "examples": ["GSD36VW33N"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "KFN",
+      "product_family": "Refrigerators",
+      "expected_category": "یخچال و فریزر",
+      "confidence": "high",
+      "examples": ["KFN96APEAG"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "HBJ",
+      "product_family": "Built-in ovens",
+      "expected_category": "فر توکار",
+      "confidence": "high",
+      "examples": ["HBJ558YB0Q", "HBJ558YW3Q"],
+      "nabkade_count": 5,
+      "torob_count": 40,
+      "status": "active"
+    },
+    {
+      "prefix": "HBF",
+      "product_family": "Built-in ovens",
+      "expected_category": "فر توکار",
+      "confidence": "high",
+      "examples": ["HBF534EB0Q", "HBF534EW0Q"],
+      "nabkade_count": 9,
+      "torob_count": 30,
+      "status": "active"
+    },
+    {
+      "prefix": "HIJ",
+      "product_family": "Built-in steam ovens",
+      "expected_category": "فر توکار",
+      "confidence": "high",
+      "examples": ["HIJ517YS0R", "HIJ517YB0R"],
+      "nabkade_count": 3,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "HSG",
+      "product_family": "Built-in steam ovens",
+      "expected_category": "فر توکار",
+      "confidence": "high",
+      "examples": ["HSG958DB1S", "HSG7361B1"],
+      "nabkade_count": 2,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "HMG",
+      "product_family": "Built-in microwave ovens",
+      "expected_category": "فر توکار",
+      "confidence": "high",
+      "examples": ["HMG978NB1", "HMG776NB1"],
+      "nabkade_count": 2,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "HNG",
+      "product_family": "Built-in ovens",
+      "expected_category": "فر توکار",
+      "confidence": "high",
+      "examples": ["HNG978NB1"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "VBC",
+      "product_family": "Built-in ovens",
+      "expected_category": "فر توکار",
+      "confidence": "high",
+      "examples": ["VBC514CR0"],
+      "nabkade_count": 1,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "VBD",
+      "product_family": "Built-in ovens",
+      "expected_category": "فر توکار",
+      "confidence": "high",
+      "examples": ["VBD554FS0"],
+      "nabkade_count": 1,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "VGD",
+      "product_family": "Built-in ovens",
+      "expected_category": "فر توکار",
+      "confidence": "high",
+      "examples": ["VGD553FB0"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "HBA",
+      "product_family": "Built-in ovens",
+      "expected_category": "فر توکار",
+      "confidence": "high",
+      "examples": ["HBA534EB1"],
+      "nabkade_count": 0,
+      "torob_count": 30,
+      "status": "active"
+    },
+    {
+      "prefix": "HBS",
+      "product_family": "Built-in ovens",
+      "expected_category": "فر توکار",
+      "confidence": "high",
+      "examples": ["HBS534BS0"],
+      "nabkade_count": 0,
+      "torob_count": 15,
+      "status": "active"
+    },
+    {
+      "prefix": "HBG",
+      "product_family": "Built-in ovens",
+      "expected_category": "فر توکار",
+      "confidence": "high",
+      "examples": ["HBG635BS1", "HBG978NB1"],
+      "nabkade_count": 14,
+      "torob_count": 100,
+      "status": "active"
+    },
+    {
+      "prefix": "HBM",
+      "product_family": "Built-in ovens",
+      "expected_category": "فر توکار",
+      "confidence": "high",
+      "examples": ["HBM787ES6"],
+      "nabkade_count": 0,
+      "torob_count": 20,
+      "status": "active"
+    },
+    {
+      "prefix": "HEB",
+      "product_family": "Built-in ovens",
+      "expected_category": "فر توکار",
+      "confidence": "high",
+      "examples": ["HEB5780S0"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "CMG",
+      "product_family": "Built-in microwaves",
+      "expected_category": "ماکروویو توکار",
+      "confidence": "high",
+      "examples": ["CMG778NB1", "CMG776NB1"],
+      "nabkade_count": 6,
+      "torob_count": 30,
+      "status": "active"
+    },
+    {
+      "prefix": "CSG",
+      "product_family": "Built-in steam ovens",
+      "expected_category": "فر توکار",
+      "confidence": "high",
+      "examples": ["CSG978NB1"],
+      "nabkade_count": 0,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "BFL",
+      "product_family": "Built-in microwaves",
+      "expected_category": "ماکروویو توکار",
+      "confidence": "high",
+      "examples": ["BFL524MW0", "BFL9221B1"],
+      "nabkade_count": 8,
+      "torob_count": 40,
+      "status": "active"
+    },
+    {
+      "prefix": "BEL",
+      "product_family": "Built-in microwaves",
+      "expected_category": "ماکروویو توکار",
+      "confidence": "high",
+      "examples": ["BEL554MW2", "BEL554MB2"],
+      "nabkade_count": 6,
+      "torob_count": 30,
+      "status": "active"
+    },
+    {
+      "prefix": "BFM",
+      "product_family": "Microwaves",
+      "expected_category": "ماکروویو",
+      "confidence": "high",
+      "examples": ["BFM554MS0"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "BMS",
+      "product_family": "Microwaves",
+      "expected_category": "ماکروویو",
+      "confidence": "high",
+      "examples": ["BMS550MXB"],
+      "nabkade_count": 0,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "FEL",
+      "product_family": "Microwaves",
+      "expected_category": "ماکروویو",
+      "confidence": "high",
+      "examples": ["FEL053MS2", "FEL053MS1"],
+      "nabkade_count": 2,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "FFL",
+      "product_family": "Built-in microwaves",
+      "expected_category": "ماکروویو توکار",
+      "confidence": "high",
+      "examples": ["FFL020MW0"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "DWB",
+      "product_family": "Hoods (wall-mounted)",
+      "expected_category": "هود",
+      "confidence": "high",
+      "examples": ["DWB96IM50"],
+      "nabkade_count": 0,
+      "torob_count": 30,
+      "status": "active"
+    },
+    {
+      "prefix": "DWK",
+      "product_family": "Hoods (wall-mounted)",
+      "expected_category": "هود",
+      "confidence": "high",
+      "examples": ["DWK91LT65", "DWK66PJ60T"],
+      "nabkade_count": 9,
+      "torob_count": 25,
+      "status": "active"
+    },
+    {
+      "prefix": "DWP",
+      "product_family": "Hoods (built-in)",
+      "expected_category": "هود توکار",
+      "confidence": "high",
+      "examples": ["DWP64CC60T", "DWP94CC50T"],
+      "nabkade_count": 4,
+      "torob_count": 15,
+      "status": "active"
+    },
+    {
+      "prefix": "DHU",
+      "product_family": "Hoods",
+      "expected_category": "هود",
+      "confidence": "high",
+      "examples": ["DHU636HQ", "DHU665CQ"],
+      "nabkade_count": 3,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "DWF",
+      "product_family": "Hoods",
+      "expected_category": "هود",
+      "confidence": "high",
+      "examples": ["DWF65AJ60T", "DWF95AJ60T"],
+      "nabkade_count": 3,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "DFT",
+      "product_family": "Hoods",
+      "expected_category": "هود",
+      "confidence": "high",
+      "examples": ["DFT63CA50Q", "DFT63CA60Q"],
+      "nabkade_count": 3,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "DHL",
+      "product_family": "Hoods",
+      "expected_category": "هود",
+      "confidence": "high",
+      "examples": ["DHL885C"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "DIB",
+      "product_family": "Hoods",
+      "expected_category": "هود",
+      "confidence": "high",
+      "examples": ["DIB97IM50"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "DLN",
+      "product_family": "Hoods (built-in)",
+      "expected_category": "هود توکار",
+      "confidence": "high",
+      "examples": ["DLN53AA70"],
+      "nabkade_count": 0,
+      "torob_count": 20,
+      "status": "active"
+    },
+    {
+      "prefix": "DRC",
+      "product_family": "Hoods",
+      "expected_category": "هود",
+      "confidence": "high",
+      "examples": ["DRC96AQ50"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "DCS",
+      "product_family": "Hoods",
+      "expected_category": "هود",
+      "confidence": "high",
+      "examples": ["DCS91AQ50"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "PBP",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PBP6C6K80Q", "PBP6C5K60Q"],
+      "nabkade_count": 0,
+      "torob_count": 40,
+      "status": "active"
+    },
+    {
+      "prefix": "PPJ",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PPJ645B80E"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "PPX",
+      "product_family": "Induction cooktops",
+      "expected_category": "صفحه برقی",
+      "confidence": "high",
+      "examples": ["PPX695HC1E"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "PXX",
+      "product_family": "Induction cooktops",
+      "expected_category": "صفحه برقی",
+      "confidence": "high",
+      "examples": ["PXX695HC1E", "PXX895D66E", "PXX995KX5E"],
+      "nabkade_count": 3,
+      "torob_count": 15,
+      "status": "active"
+    },
+    {
+      "prefix": "PCQ",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PCQ7A5M90"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "PKF",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PKF715BB5E"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "PKM",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PKM775GP1E"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "PKE",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PKE645CA2E", "PKE645BB2E"],
+      "nabkade_count": 3,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "POP",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["POP7C2P30O", "POP7C6P30O"],
+      "nabkade_count": 3,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "PKN",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PKN811FP2E", "PKN652FP2E"],
+      "nabkade_count": 2,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "PPQ",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PPQ7A6B20", "PPQ9A6B90"],
+      "nabkade_count": 2,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "PUG",
+      "product_family": "Induction cooktops",
+      "expected_category": "صفحه برقی",
+      "confidence": "high",
+      "examples": ["PUG61KAA5E"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "PUE",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PUE611BB5E"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "PPH",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PPH6A6B20"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "PPC",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PPC7A5M90"],
+      "nabkade_count": 0,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "PCS",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PCS7A5M90"],
+      "nabkade_count": 1,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "PCP",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PCP6A5B90M"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "PCR",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PCR9A5B90M"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "PRP",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PRP6A6D70R"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "PRS",
+      "product_family": "Ceramic cooktops",
+      "expected_category": "صفحه سرامیکی",
+      "confidence": "high",
+      "examples": ["PRS9A6D70M"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "PIV",
+      "product_family": "Electric cooktops",
+      "expected_category": "صفحه برقی",
+      "confidence": "high",
+      "examples": ["PIV975DC1E"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "PRB",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PRB3A6D70M"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "PRY",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PRY6A6B70Q"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "PPP",
+      "product_family": "Gas cooktops",
+      "expected_category": "صفحه گازی",
+      "confidence": "high",
+      "examples": ["PPP6A2B20O"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "HXC",
+      "product_family": "Gas stoves",
+      "expected_category": "اجاق گاز",
+      "confidence": "high",
+      "examples": ["HXC39AG21Q"],
+      "nabkade_count": 0,
+      "torob_count": 20,
+      "status": "active"
+    },
+    {
+      "prefix": "HKW",
+      "product_family": "Gas stoves",
+      "expected_category": "اجاق گاز",
+      "confidence": "high",
+      "examples": ["HKW636FS5"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "BGL",
+      "product_family": "Vacuum cleaners",
+      "expected_category": "جاروبرقی",
+      "confidence": "high",
+      "examples": ["BGL8ALL5", "BGL8POW3A", "BGL38WBU3H"],
+      "nabkade_count": 10,
+      "torob_count": 80,
+      "status": "active"
+    },
+    {
+      "prefix": "BGS",
+      "product_family": "Vacuum cleaners",
+      "expected_category": "جاروبرقی",
+      "confidence": "high",
+      "examples": ["BGS7POW2", "BGS7PET1", "BGS21POW2"],
+      "nabkade_count": 13,
+      "torob_count": 60,
+      "status": "active"
+    },
+    {
+      "prefix": "BGR",
+      "product_family": "Vacuum cleaners",
+      "expected_category": "جاروبرقی",
+      "confidence": "high",
+      "examples": ["BGR32450"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "BWD",
+      "product_family": "Wet/dry vacuum cleaners",
+      "expected_category": "جاروبرقی",
+      "confidence": "high",
+      "examples": ["BWD420HYG", "BWD421PRO"],
+      "nabkade_count": 0,
+      "torob_count": 15,
+      "status": "active"
+    },
+    {
+      "prefix": "BSH",
+      "product_family": "Vacuum cleaners",
+      "expected_category": "جاروبرقی",
+      "confidence": "high",
+      "examples": ["BSH7POW3"],
+      "nabkade_count": 0,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "BSG",
+      "product_family": "Vacuum cleaners",
+      "expected_category": "جاروبرقی",
+      "confidence": "high",
+      "examples": ["BSGL3MULT3"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "BBS",
+      "product_family": "Vacuum cleaners",
+      "expected_category": "جاروبرقی",
+      "confidence": "high",
+      "examples": ["BBS7POW3"],
+      "nabkade_count": 0,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "BGBS",
+      "product_family": "Vacuum cleaners",
+      "expected_category": "جاروبرقی",
+      "confidence": "high",
+      "examples": ["BGBS2BA1P", "BGBS2LB1"],
+      "nabkade_count": 2,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "BGC",
+      "product_family": "Vacuum cleaners",
+      "expected_category": "جاروبرقی",
+      "confidence": "high",
+      "examples": ["BGC21X300", "BGC05AAA2"],
+      "nabkade_count": 4,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "BCS",
+      "product_family": "Cordless vacuum cleaners",
+      "expected_category": "جارو شارژی",
+      "confidence": "high",
+      "examples": ["BCS931WBA", "BCS931GAC", "BCS1041WAC"],
+      "nabkade_count": 8,
+      "torob_count": 20,
+      "status": "active"
+    },
+    {
+      "prefix": "BCH",
+      "product_family": "Cordless vacuum cleaners",
+      "expected_category": "جارو شارژی",
+      "confidence": "high",
+      "examples": ["BCH86HYG1", "BCH86PET1"],
+      "nabkade_count": 2,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "BCHF",
+      "product_family": "Cordless vacuum cleaners",
+      "expected_category": "جارو شارژی",
+      "confidence": "high",
+      "examples": ["BCHF2MX20"],
+      "nabkade_count": 1,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "BBHF",
+      "product_family": "Cordless vacuum cleaners",
+      "expected_category": "جارو شارژی",
+      "confidence": "high",
+      "examples": ["BBHF214R"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "BHN",
+      "product_family": "Cordless vacuum cleaners",
+      "expected_category": "جارو شارژی",
+      "confidence": "high",
+      "examples": ["BHN16L"],
+      "nabkade_count": 1,
+      "torob_count": 3,
+      "status": "active"
+    },
+    {
+      "prefix": "MES",
+      "product_family": "Juicers",
+      "expected_category": "آبمیوه گیری",
+      "confidence": "high",
+      "examples": ["MES3500", "MES25A0", "MES4010"],
+      "nabkade_count": 6,
+      "torob_count": 60,
+      "status": "active"
+    },
+    {
+      "prefix": "MCP",
+      "product_family": "Citrus presses",
+      "expected_category": "آب مرکبات گیری",
+      "confidence": "high",
+      "examples": ["MCP3500N", "MCP72GPB"],
+      "nabkade_count": 2,
+      "torob_count": 15,
+      "status": "active"
+    },
+    {
+      "prefix": "MUM",
+      "product_family": "Stand mixers",
+      "expected_category": "همزن",
+      "confidence": "high",
+      "examples": ["MUM54P00", "MUM57860", "MUM9GX5S21"],
+      "nabkade_count": 16,
+      "torob_count": 80,
+      "status": "active"
+    },
+    {
+      "prefix": "MFQ",
+      "product_family": "Hand mixers",
+      "expected_category": "همزن",
+      "confidence": "high",
+      "examples": ["MFQ40304", "MFQ3540", "MFQ36460"],
+      "nabkade_count": 11,
+      "torob_count": 50,
+      "status": "active"
+    },
+    {
+      "prefix": "MFZ",
+      "product_family": "Hand mixers",
+      "expected_category": "همزن",
+      "confidence": "high",
+      "examples": ["MFZ4020"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "MSM",
+      "product_family": "Immersion blenders",
+      "expected_category": "گوشت کوب برقی",
+      "confidence": "high",
+      "examples": ["MSM6M831", "MSM4B654", "MSM4W421"],
+      "nabkade_count": 13,
+      "torob_count": 60,
+      "status": "active"
+    },
+    {
+      "prefix": "MS",
+      "product_family": "Immersion blenders",
+      "expected_category": "گوشت کوب برقی",
+      "confidence": "high",
+      "examples": ["MS8CM6160", "MS6CM6155"],
+      "nabkade_count": 2,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "MCM",
+      "product_family": "Food processors",
+      "expected_category": "غذا ساز",
+      "confidence": "high",
+      "examples": ["MCM3PM386", "MCM3203"],
+      "nabkade_count": 0,
+      "torob_count": 30,
+      "status": "active"
+    },
+    {
+      "prefix": "MMB",
+      "product_family": "Blenders",
+      "expected_category": "مخلوط کن",
+      "confidence": "high",
+      "examples": ["MMB6652B", "MMB6141W", "MMB6177S"],
+      "nabkade_count": 10,
+      "torob_count": 40,
+      "status": "active"
+    },
+    {
+      "prefix": "MMR",
+      "product_family": "Choppers",
+      "expected_category": "خردکن",
+      "confidence": "high",
+      "examples": ["MMR08A1", "MMR15A1", "MMRP1000"],
+      "nabkade_count": 0,
+      "torob_count": 50,
+      "status": "active"
+    },
+    {
+      "prefix": "MC",
+      "product_family": "Food processors",
+      "expected_category": "غذا ساز",
+      "confidence": "medium",
+      "examples": ["MC812W620", "MC812S844", "MC812M865"],
+      "nabkade_count": 3,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "TDA",
+      "product_family": "Steam irons",
+      "expected_category": "اتو بخار",
+      "confidence": "high",
+      "examples": ["TDA753022V", "TDA3024010"],
+      "nabkade_count": 0,
+      "torob_count": 50,
+      "status": "active"
+    },
+    {
+      "prefix": "TDS",
+      "product_family": "Steam generator irons",
+      "expected_category": "اتو بخار",
+      "confidence": "high",
+      "examples": ["TDS6040", "TDS3715100"],
+      "nabkade_count": 0,
+      "torob_count": 30,
+      "status": "active"
+    },
+    {
+      "prefix": "TDZ",
+      "product_family": "Irons",
+      "expected_category": "اتو",
+      "confidence": "high",
+      "examples": ["TDZ1104"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "TDL",
+      "product_family": "Irons",
+      "expected_category": "اتو",
+      "confidence": "high",
+      "examples": ["TDL0601"],
+      "nabkade_count": 0,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "TLB",
+      "product_family": "Irons",
+      "expected_category": "اتو",
+      "confidence": "high",
+      "examples": ["TLB5000"],
+      "nabkade_count": 0,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "TAT",
+      "product_family": "Toasters",
+      "expected_category": "توستر",
+      "confidence": "high",
+      "examples": ["TAT8613N", "TAT4M224", "TAT3P421"],
+      "nabkade_count": 14,
+      "torob_count": 40,
+      "status": "active"
+    },
+    {
+      "prefix": "TWK",
+      "product_family": "Electric kettles",
+      "expected_category": "کتری برقی",
+      "confidence": "high",
+      "examples": ["TWK1M121", "TWK3P424", "TWK4M221"],
+      "nabkade_count": 14,
+      "torob_count": 50,
+      "status": "active"
+    },
+    {
+      "prefix": "TKA",
+      "product_family": "Coffee makers",
+      "expected_category": "قهوه ساز",
+      "confidence": "high",
+      "examples": ["TKA8013", "TKA6323", "TKA8633"],
+      "nabkade_count": 5,
+      "torob_count": 40,
+      "status": "active"
+    },
+    {
+      "prefix": "TIE",
+      "product_family": "Espresso machines",
+      "expected_category": "اسپرسو ساز",
+      "confidence": "high",
+      "examples": ["TIE20119", "TIE20504"],
+      "nabkade_count": 2,
+      "torob_count": 15,
+      "status": "active"
+    },
+    {
+      "prefix": "TIS",
+      "product_family": "Espresso machines",
+      "expected_category": "اسپرسو ساز",
+      "confidence": "high",
+      "examples": ["TIS30351DE", "TIS30129RW"],
+      "nabkade_count": 0,
+      "torob_count": 20,
+      "status": "active"
+    },
+    {
+      "prefix": "TCA",
+      "product_family": "Espresso machines",
+      "expected_category": "اسپرسو ساز",
+      "confidence": "high",
+      "examples": ["TCA5309"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "TES",
+      "product_family": "Espresso machines",
+      "expected_category": "اسپرسو ساز",
+      "confidence": "high",
+      "examples": ["TES60729RW"],
+      "nabkade_count": 0,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "TCG",
+      "product_family": "Grill/sandwich makers",
+      "expected_category": "گریل",
+      "confidence": "high",
+      "examples": ["TCG3323"],
+      "nabkade_count": 1,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "CTL",
+      "product_family": "Built-in coffee machines",
+      "expected_category": "اسپرسو ساز توکار",
+      "confidence": "high",
+      "examples": ["CTL9181B0", "CTL7181B0"],
+      "nabkade_count": 3,
+      "torob_count": 10,
+      "status": "active"
+    },
+    {
+      "prefix": "TSM",
+      "product_family": "Coffee grinders",
+      "expected_category": "آسیاب",
+      "confidence": "high",
+      "examples": ["TSM6A011W", "TSM6A013B"],
+      "nabkade_count": 2,
+      "torob_count": 5,
+      "status": "active"
+    },
+    {
+      "prefix": "HEZ",
+      "product_family": "Oven accessories",
+      "expected_category": "لوازم جانبی فر",
+      "confidence": "high",
+      "examples": ["HEZ429001"],
+      "nabkade_count": 0,
+      "torob_count": 20,
+      "status": "active"
+    },
+    {
+      "prefix": "BSSJ",
+      "product_family": "Accessories",
+      "expected_category": "لوازم جانبی",
+      "confidence": "high",
+      "examples": ["BSSJ-3882"],
+      "nabkade_count": 0,
+      "torob_count": 5,
+      "status": "active"
+    }
+  ]
+}

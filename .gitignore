@@ -1,0 +1,73 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# Virtual Environment
+venv/
+.venv/
+env/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# pytest
+.pytest_cache/
+
+# Environment / Secrets
+.env
+.env.local
+.env.production
+
+# SQLite databases (runtime data)
+*.db
+*.sqlite3
+data/monitor_store.db
+data/proxy_health.db
+data/watch_list.db
+data/torob.sqlite3
+data/your_database.db
+
+# Generated CSV files
+*.csv
+
+# Backup files
+*.bak*
+*.backup
+
+# Temporary files
+*.tmp
+temp.*
+*.log
+
+# Lock files
+data/.monitor.lock
+
+# Runtime data
+data/metrics.json
+data/torob_cookies.json
+data/backups/
+data/logs/
+
+# Playwright
+playwright-report/
+test-results/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Reports (generated, not source)
+data/analysis/
+data/infra_smoke_report.txt
+data/recovery_report.json
+data/matcher_qa_report.md
+data/bosch_products_links.backup.csv
+data/bosch_products_links.tmp.csv
