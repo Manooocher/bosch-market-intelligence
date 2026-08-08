@@ -53,8 +53,22 @@ class TorobCrawler:
         )
 
     def get_product_details(self, product_id: str) -> CrawlerResponse:
+        """Fetch product details (metadata only, no seller list)."""
         params = {"prk": product_id, "source": "torob_search"}
         resp = self.client.request(self.config.endpoints.details, params=params)
+        return CrawlerResponse(
+            success=resp.success, data=resp.data,
+            status_code=resp.status_code, error=resp.error,
+        )
+
+    def get_sellers(self, product_id: str) -> CrawlerResponse:
+        """Fetch full seller list for a product (up to 50 sellers).
+
+        Uses the dedicated sellers endpoint:
+        /base-product/sellers/?prk=<product_id>
+        """
+        url = f"{self.config.endpoints.api_base}/base-product/sellers/?prk={product_id}"
+        resp = self.client.request(url)
         return CrawlerResponse(
             success=resp.success, data=resp.data,
             status_code=resp.status_code, error=resp.error,

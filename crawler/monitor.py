@@ -1,7 +1,10 @@
 """Daily Market Monitor — main pipeline.
 
-Reads Watch List → Fetches Torob data → Parses sellers →
+Reads Watch List → Fetches Torob product details → Parses sellers →
 Calculates statistics → Converts currency → Stores results.
+
+V2: Uses get_product_details() directly instead of search API.
+This captures the full seller list (up to 50) for accurate competition analysis.
 """
 
 import json
@@ -18,7 +21,7 @@ from crawler.circuit_breaker import CircuitBreaker
 from crawler.metrics import MetricsCollector
 from crawler.currency import ExchangeRateFetcher, RialRate, toman_to_usd_cents
 from crawler.statistics import compute_market_stats, MarketStats
-from crawler.seller_parser import parse_sellers, SellerParseResult
+from crawler.seller_parser import parse_sellers_v2, SellerParseResult
 from crawler.monitor_db import MonitorDB
 
 logger = logging.getLogger(__name__)
@@ -49,16 +52,22 @@ class ProductMarketData:
     success: bool = False
     error: str = ""
     sellers: list[dict] = field(default_factory=list)
+    # ── New fields ──
+    source_method: str = "details_api"
+    total_sellers_raw: int = 0
+    in_stock_count: int = 0
 
 
 class DailyMonitor:
     """Production daily monitor for Watch List products.
 
-    Pipeline:
+    Pipeline (V2 — Details API):
     1. Load Watch List from matcher DB
-    2. For each product: fetch Torob data, parse sellers, compute stats, convert USD
-    3. Store results in monitor DB
-    4. Update latest_prices for client API
+    2. For each product: get_product_details(torob_id)
+    3. Parse full seller array (up to 50 sellers)
+    4. Compute market statistics (in-stock sellers only)
+    5. Convert to USD
+    6. Store results in monitor DB
     """
 
     def __init__(
@@ -77,11 +86,13 @@ class DailyMonitor:
         self.metrics = metrics
         self.config = config
         self._run_id: int | None = None
+        self._product_failures: dict = {}      # torob_id → consecutive failure count
+        self._global_consecutive_failures: int = 0
 
     def run(self) -> dict:
         """Execute the full monitoring pipeline. Returns summary."""
         start_time = time.time()
-        logger.info("=== Daily Market Monitor Started ===")
+        logger.info("=== Daily Market Monitor Started (V2 — Details API) ===")
 
         # 1. Create run
         self._run_id = self.db.start_run()
@@ -114,7 +125,7 @@ class DailyMonitor:
                 batch_succeeded = 0
 
                 for item in batch:
-                    # Delay between items
+                    # Delay between items (4-6s)
                     delay = self.scheduler.get_delay()
                     time.sleep(delay)
 
@@ -124,14 +135,24 @@ class DailyMonitor:
                         time.sleep(120)
                         self.crawler.client.circuit_breaker.reset()
 
-                    # Fetch and process
+                    # Check global consecutive failure circuit breaker
+                    if self._global_consecutive_failures >= 5:
+                        logger.critical("5 global consecutive failures — halting execution")
+                        break
+
+                    # Fetch and process (details API)
                     market_data = self._process_product(item, rate)
                     if market_data.success:
                         total_succeeded += 1
                         batch_succeeded += 1
                         self._store_product_data(market_data)
+                        self._global_consecutive_failures = 0
                     else:
                         total_failed += 1
+                        torob_id = item.get("preferred_torob_id", "")
+                        self._product_failures[torob_id] = self._product_failures.get(torob_id, 0) + 1
+                        self._global_consecutive_failures += 1
+
                         self.db.log_event(
                             self._run_id,
                             item.get("nabkade_product_id", ""),
@@ -156,7 +177,11 @@ class DailyMonitor:
                 pause = self.scheduler.get_batch_pause()
                 logger.info(f"Batch pause: {pause:.1f}s")
                 time.sleep(pause)
-                time.sleep(pause)
+
+                # Check global halt
+                if self._global_consecutive_failures >= 5:
+                    logger.critical("Global circuit breaker tripped — halting monitor")
+                    break
 
             # 5. Finish
             duration_ms = int((time.time() - start_time) * 1000)
@@ -193,7 +218,12 @@ class DailyMonitor:
             raise
 
     def _process_product(self, item: dict, rate: RialRate) -> ProductMarketData:
-        """Fetch Torob data and compute stats for one product."""
+        """Fetch product sellers from Torob and compute stats.
+
+        V3: Uses get_sellers() endpoint — NO search API, NO details API.
+        The sellers endpoint returns the full seller list (up to 40+ sellers).
+        Filters out-of-stock sellers from price statistics.
+        """
         nabkade_id = item.get("nabkade_product_id", "")
         torob_id = item.get("preferred_torob_id", "")
         sku = item.get("canonical_sku", "")
@@ -208,71 +238,65 @@ class DailyMonitor:
             title=title,
             category=category,
             fetched_at=now,
+            source_method="sellers_api",
         )
 
         try:
-            # Fetch product details from Torob
-            response = self.crawler.search(query=sku or title, brand=73)
+            # ── Fetch sellers via dedicated sellers endpoint ──
+            sellers_response = self.crawler.get_sellers(torob_id)
 
-            if not response.success or not response.data:
-                product_data.error = response.error or "empty_response"
+            if not sellers_response.success:
+                if sellers_response.status_code == 404:
+                    product_data.error = "product_deleted"
+                    self.db.upsert_product_status(torob_id, "deleted")
+                    return product_data
+                product_data.error = sellers_response.error or "sellers_fetch_failed"
                 return product_data
 
-            # Find our product in results
-            results = response.data.get("results", [])
-            torob_product = None
-
-            for r in results:
-                r_id = r.get("random_key", "")
-                if r_id == torob_id:
-                    torob_product = r
-                    break
-                # Fallback: check if title matches
-                r_title = r.get("name1", "")
-                if sku and sku.lower() in r_title.lower():
-                    torob_product = r
-                    break
-
-            if not torob_product:
-                # Try details endpoint
-                detail_response = self.crawler.get_product_details(torob_id)
-                if detail_response.success and detail_response.data:
-                    torob_product = detail_response.data
-
-            if not torob_product:
-                product_data.error = "product_not_found"
+            sellers_data = sellers_response.data
+            if not sellers_data:
+                product_data.error = "empty_sellers_response"
                 return product_data
 
-            # Parse sellers
-            seller_result = parse_sellers(torob_product, torob_id)
+            # Extract sellers array from response
+            sellers_list = sellers_data.get("results", []) if isinstance(sellers_data, dict) else sellers_data
+            if not isinstance(sellers_list, list):
+                product_data.error = "invalid_sellers_format"
+                return product_data
 
+            # ── Parse sellers ──
+            seller_result = parse_sellers_v2({"sellers": sellers_list, "name1": title}, torob_id)
+
+            # Update product status
             if not seller_result.sellers:
-                # Check if product itself has price (single-seller)
-                single_price = torob_product.get("price", 0)
-                if single_price and int(single_price) > 0:
-                    from crawler.seller_parser import Seller
-                    seller_result.sellers = [Seller(
-                        seller_id="direct",
-                        seller_name="Torob",
-                        price_rial=int(single_price),
-                    )]
+                self.db.upsert_product_status(torob_id, "no_sellers")
+            else:
+                self.db.upsert_product_status(torob_id, "active")
 
-            if not seller_result.sellers:
-                product_data.error = "no_sellers"
+            # Total sellers returned by API
+            product_data.total_sellers_raw = len(seller_result.sellers)
+
+            # Filter to in_stock sellers ONLY for statistics
+            in_stock_sellers = [s for s in seller_result.sellers if s.in_stock]
+            product_data.in_stock_count = len(in_stock_sellers)
+
+            if not in_stock_sellers:
+                product_data.error = "no_in_stock_sellers"
+                product_data.seller_count = 0
+                product_data.success = True
+                product_data.sellers = []
                 return product_data
 
-            # Extract prices
-            prices_rial = [s.price_rial for s in seller_result.sellers if s.price_rial > 0]
-
+            # Extract prices from in_stock sellers only
+            prices_rial = [s.price_rial for s in in_stock_sellers if s.price_rial > 0]
             if not prices_rial:
-                product_data.error = "no_valid_prices"
+                product_data.error = "no_valid_prices_in_stock"
                 return product_data
 
             # Compute market statistics
             stats = compute_market_stats(prices_rial)
 
-            # Convert to USD
-            product_data.seller_count = stats.seller_count
+            product_data.seller_count = len(in_stock_sellers)
             product_data.min_price_rial = stats.min_price
             product_data.max_price_rial = stats.max_price
             product_data.avg_price_rial = stats.avg_price
@@ -287,12 +311,17 @@ class DailyMonitor:
             product_data.avg_price_usd = toman_to_usd_cents(stats.avg_price, rate.value)
             product_data.median_price_usd = toman_to_usd_cents(stats.median_price, rate.value)
 
-            # Store seller data
+            # Store ALL sellers (including out_of_stock) for complete record
             product_data.sellers = [
                 {
                     "seller_id": s.seller_id,
                     "seller_name": s.seller_name,
                     "price_rial": s.price_rial,
+                    "seller_score": s.seller_score,
+                    "seller_city": s.seller_city,
+                    "warranty_info": s.warranty_info,
+                    "is_promoted": s.is_promoted,
+                    "extra_info_json": s.extra_info_json,
                     "original_price_rial": s.original_price_rial,
                     "has_discount": s.has_discount,
                     "in_stock": s.in_stock,
@@ -331,7 +360,9 @@ class DailyMonitor:
             "price_compression": data.price_compression,
             "price_dispersion": data.price_dispersion,
             "price_spread": data.price_spread,
-            "fetched_at": data.fetched_at,
+            "source_method": data.source_method,
+            "total_sellers_raw": data.total_sellers_raw,
+            "in_stock_count": data.in_stock_count,
         }
 
         snapshot_id = self.db.insert_snapshot(self._run_id, snapshot_data)

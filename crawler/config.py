@@ -167,9 +167,9 @@ class CrawlerConfig:
         ),
         "monitor": RateProfile(
             name="monitor",
-            requests_per_batch=50,
-            delay_min=1.0, delay_max=2.0,
-            pause_between_batches_min=30.0, pause_between_batches_max=45.0,
+            requests_per_batch=40,
+            delay_min=4.0, delay_max=6.0,
+            pause_between_batches_min=45.0, pause_between_batches_max=60.0,
             long_pause_interval=80, long_pause_min=60.0, long_pause_max=90.0,
         ),
         "discovery": RateProfile(
