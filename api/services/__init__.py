@@ -1,0 +1,146 @@
+"""Services package — business logic layer."""
+
+import os
+import logging
+from dataclasses import dataclass
+from datetime import datetime, timedelta, timezone
+from decimal import Decimal, ROUND_HALF_UP
+from typing import Literal
+
+logger = logging.getLogger(__name__)
+
+
+@dataclass
+class MarginResult:
+    nabkade_price_toman: int = 0
+    nabkade_price_usd_cents: int = 0
+    market_min_price_toman: int = 0
+    market_median_price_toman: int = 0
+    margin_vs_min_toman: int = 0
+    margin_vs_median_toman: int = 0
+    margin_vs_min_pct: float = 0.0
+    margin_vs_median_pct: float = 0.0
+    is_profitable: bool = False
+    data_freshness: str = "unknown"
+
+
+def parse_toman(price_str: str) -> int:
+    """Parse Toman price from string format like '127,300,000'."""
+    if not price_str:
+        return 0
+    cleaned = price_str.replace(",", "").replace("،", "").strip()
+    persian = "۰۱۲۳۴۵۶۷۸۹"
+    ascii_d = "0123456789"
+    for p, a in zip(persian, ascii_d):
+        cleaned = cleaned.replace(p, a)
+    try:
+        return int(cleaned)
+    except ValueError:
+        return 0
+
+
+def toman_to_usd_cents(toman_price: int, rial_rate: int) -> int:
+    if rial_rate <= 0 or toman_price <= 0:
+        return 0
+    rial = toman_price * 10
+    cents = (Decimal(str(rial)) * Decimal("100") / Decimal(str(rial_rate)))
+    return int(cents.quantize(Decimal("1")))
+
+
+class FreshnessAnalyzer:
+    @staticmethod
+    def analyze(fetched_at: datetime | None) -> str:
+        if not fetched_at:
+            return "unknown"
+        age = datetime.now(timezone.utc) - fetched_at
+        if age < timedelta(hours=24):
+            return "fresh"
+        if age < timedelta(hours=96):
+            return "acceptable"
+        return "stale"
+
+
+class MarginCalculator:
+    def __init__(self, exchange_rate: int):
+        self._rate = exchange_rate
+
+    def calculate(self, nabkade_price_toman: int, market_min_rial: int, market_median_rial: int) -> dict:
+        if nabkade_price_toman <= 0 or market_min_rial <= 0 or self._rate <= 0:
+            return {"margin_vs_min_toman": 0, "margin_vs_median_toman": 0, "margin_vs_min_pct": 0.0, "margin_vs_median_pct": 0.0, "is_profitable": False}
+
+        nabkade_rial = nabkade_price_toman * 10
+        nabkade_usd_cents = int((Decimal(str(nabkade_rial)) * Decimal("100") / Decimal(str(self._rate))).quantize(Decimal("1")))
+        min_market_toman = market_min_rial // 10
+        median_market_toman = market_median_rial // 10
+        margin_min = nabkade_price_toman - min_market_toman
+        margin_median = nabkade_price_toman - median_market_toman
+        pct_min = float(Decimal(str(margin_min)) / Decimal(str(nabkade_price_toman)) * 100) if nabkade_price_toman > 0 else 0.0
+        pct_median = float(Decimal(str(margin_median)) / Decimal(str(nabkade_price_toman)) * 100) if nabkade_price_toman > 0 else 0.0
+        return {"nabkade_price_toman": nabkade_price_toman, "nabkade_price_usd_cents": nabkade_usd_cents, "market_min_price_toman": min_market_toman, "market_median_price_toman": median_market_toman, "margin_vs_min_toman": margin_min, "margin_vs_median_toman": margin_median, "margin_vs_min_pct": round(pct_min, 1), "margin_vs_median_pct": round(pct_median, 1), "is_profitable": margin_min > 0}
+
+
+class ExchangeRateService:
+    def __init__(self, ttl_seconds: int = 3600):
+        self._cache = {"rate": 0, "source": "", "fetched_at": None}
+        self._ttl = ttl_seconds
+
+    async def get_rate(self) -> dict:
+        if self._is_stale():
+            rate = await self._fetch()
+            self._cache = rate
+        return self._cache
+
+    def _is_stale(self) -> bool:
+        if not self._cache["fetched_at"]:
+            return True
+        return (datetime.now(timezone.utc) - self._cache["fetched_at"]).total_seconds() > self._ttl
+
+    async def _fetch(self) -> dict:
+        import aiohttp
+        url = os.getenv("TABDEAL_API_URL", "https://api1.tabdeal.org/r/api/v1/depth?symbol=USDTIRT&limit=1")
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
+                    data = await resp.json()
+                    asks = data.get("asks", [])
+                    if asks and asks[0]:
+                        rate = int(float(str(asks[0][0])))
+                        logger.info(f"Exchange rate: {rate} IRR/USDT (tabdeal)")
+                        return {"rate": rate, "source": "tabdeal", "fetched_at": datetime.now(timezone.utc)}
+        except Exception as e:
+            logger.warning(f"Tabdeal fetch failed: {e}")
+
+        logger.warning("Using fallback rate 187790")
+        return {"rate": 187790, "source": "fallback", "fetched_at": datetime.now(timezone.utc)}
+
+
+class FreshnessAnalyzer:
+    @staticmethod
+    def analyze(fetched_at: datetime | None) -> str:
+        if not fetched_at:
+            return "unknown"
+        age = datetime.now(timezone.utc) - fetched_at
+        if age < timedelta(hours=24):
+            return "fresh"
+        if age < timedelta(hours=96):
+            return "acceptable"
+        return "stale"
+
+
+class MarginCalculator:
+    def __init__(self, exchange_rate: int):
+        self._rate = exchange_rate
+
+    def calculate(self, nabkade_price_toman: int, market_min_rial: int, market_median_rial: int) -> dict:
+        if nabkade_price_toman <= 0 or market_min_rial <= 0 or self._rate <= 0:
+            return {"margin_vs_min_toman": 0, "margin_vs_median_toman": 0, "margin_vs_min_pct": 0.0, "margin_vs_median_pct": 0.0, "is_profitable": False}
+
+        nabkade_rial = nabkade_price_toman * 10
+        nabkade_usd_cents = int((Decimal(str(nabkade_rial)) * Decimal("100") / Decimal(str(self._rate))).quantize(Decimal("1")))
+        min_market_toman = market_min_rial // 10
+        median_market_toman = market_median_rial // 10
+        margin_min = nabkade_price_toman - min_market_toman
+        margin_median = nabkade_price_toman - median_market_toman
+        pct_min = float(Decimal(str(margin_min)) / Decimal(str(nabkade_price_toman)) * 100) if nabkade_price_toman > 0 else 0.0
+        pct_median = float(Decimal(str(margin_median)) / Decimal(str(nabkade_price_toman)) * 100) if nabkade_price_toman > 0 else 0.0
+        return {"nabkade_price_toman": nabkade_price_toman, "nabkade_price_usd_cents": nabkade_usd_cents, "market_min_price_toman": min_market_toman, "market_median_price_toman": median_market_toman, "margin_vs_min_toman": margin_min, "margin_vs_median_toman": margin_median, "margin_vs_min_pct": round(pct_min, 1), "margin_vs_median_pct": round(pct_median, 1), "is_profitable": margin_min > 0}
