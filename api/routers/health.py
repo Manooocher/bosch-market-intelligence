@@ -1,12 +1,14 @@
 """System health endpoint."""
 
-import os
+import logging
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from db.base import get_session
 from db.models import MonitorRun
+
+logger = logging.getLogger("api.routers.health")
 
 router = APIRouter(prefix="/api/system", tags=["system"])
 

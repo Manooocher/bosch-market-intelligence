@@ -1,5 +1,6 @@
 """Market overview endpoint."""
 
+from datetime import datetime, timezone
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func

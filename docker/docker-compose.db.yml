@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: torob_postgres
+    environment:
+      POSTGRES_USER: torob_user
+      POSTGRES_PASSWORD: SecurePassword123
+      POSTGRES_DB: torob_intel
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  pgdata:

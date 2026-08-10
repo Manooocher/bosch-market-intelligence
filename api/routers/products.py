@@ -1,11 +1,11 @@
 """Products endpoints — list and detail."""
 
-import logging
+from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, desc, asc
 from db.base import get_session
-from db.models import LatestPrice, SellerSnapshot
+from db.models import LatestPrice, SellerSnapshot, MarketSnapshot
 
 router = APIRouter(prefix="/api/products", tags=["products"])
 
@@ -16,20 +16,13 @@ async def list_products(
     per_page: int = Query(20, ge=1, le=100),
     sort_by: str = Query("competition_score"),
     sort_dir: str = Query("desc"),
-    category: str = Query(None),
-    min_margin: float = Query(None),
     session: AsyncSession = Depends(get_session),
 ):
-    """Paginated list of products with sorting and filtering."""
+    """Paginated list of products with sorting."""
     query = select(LatestPrice)
-
-    if category:
-        query = query.where(LatestPrice.category.ilike(f"%{category}%"))
 
     # Count total
     count_query = select(func.count(LatestPrice.nabkade_product_id))
-    if category:
-        count_query = count_query.where(LatestPrice.category.ilike(f"%{category}%"))
     total = await session.scalar(count_query) or 0
     total_pages = max(1, (total + per_page - 1) // per_page)
 
@@ -44,7 +37,7 @@ async def list_products(
     query = query.offset((page - 1) * per_page).limit(per_page)
 
     result = await session.execute(query)
-    products = [dict(row._mapping) for row in result.scalars().all()]
+    products = [dict(row._mapping) for row in result.all()]
 
     return {
         "pagination": {
@@ -71,11 +64,13 @@ async def get_product(
     if not product:
         return {"error": "Product not found", "torob_product_id": torob_id}
 
-    # Get sellers
+    # Get sellers for this specific product (via its market snapshots)
     sellers_q = await session.execute(
-        select(SellerSnapshot).where(SellerSnapshot.market_snapshot_id > 0)
+        select(SellerSnapshot)
+        .join(MarketSnapshot, SellerSnapshot.market_snapshot_id == MarketSnapshot.id)
+        .where(MarketSnapshot.torob_product_id == torob_id)
     )
-    sellers = [dict(s._mapping) for s in sellers_q.scalars().all() if s._mapping.get("market_snapshot_id")]
+    sellers = sellers_q.scalars().all()
 
     # Price distribution
     min_p = product.min_price_rial or 0
@@ -86,12 +81,12 @@ async def get_product(
     for i in range(4):
         lo = min_p + i * bucket
         hi = min_p + (i + 1) * bucket if i < 3 else max_p
-        count = sum(1 for s in sellers if lo <= (s._mapping.get("price_rial", 0) or 0) < hi)
+        count = sum(1 for s in sellers if lo <= (s.price_rial or 0) < hi)
         distribution.append({"range": f"{lo//1000000}M-{hi//1000000}M", "count": count})
 
     freshness = "unknown"
-    if product.fetched_at:
-        age = datetime.now(timezone.utc) - product.fetched_at
+    if product.last_fetched_at:
+        age = datetime.now(timezone.utc) - product.last_fetched_at
         if age < timedelta(hours=24):
             freshness = "fresh"
         elif age < timedelta(hours=96):
@@ -103,7 +98,6 @@ async def get_product(
         "torob_product_id": torob_id,
         "sku": product.sku,
         "title": product.title,
-        "category": product.category,
         "market_stats": {
             "seller_count": product.seller_count or 0,
             "min_price_rial": product.min_price_rial or 0,
@@ -111,7 +105,7 @@ async def get_product(
             "avg_price_rial": product.avg_price_rial or 0,
             "median_price_rial": product.median_price_rial or 0,
             "competition_score": product.competition_score or 0,
-            "fetched_at": str(product.fetched_at) if product.fetched_at else None,
+            "fetched_at": str(product.last_fetched_at) if product.last_fetched_at else None,
             "freshness": freshness,
         },
         "price_distribution": {"buckets": distribution},
@@ -126,18 +120,19 @@ async def get_sellers(
     """List of sellers for a product, sorted by price."""
     result = await session.execute(
         select(SellerSnapshot)
-        .where(SellerSnapshot.market_snapshot_id > 0)
+        .join(MarketSnapshot, SellerSnapshot.market_snapshot_id == MarketSnapshot.id)
+        .where(MarketSnapshot.torob_product_id == torob_id)
         .order_by(SellerSnapshot.price_rial)
     )
     sellers = [
         {
-            "seller_id": s._mapping.get("seller_id"),
-            "seller_name": s._mapping.get("seller_name"),
-            "price_rial": s._mapping.get("price_rial"),
-            "seller_score": s._mapping.get("seller_score"),
-            "seller_city": s._mapping.get("seller_city"),
-            "is_in_stock": s._mapping.get("is_in_stock", True),
-            "is_promoted": s._mapping.get("is_promoted", False),
+            "seller_id": s.seller_id,
+            "seller_name": s.seller_name,
+            "price_rial": s.price_rial,
+            "seller_score": s.seller_score,
+            "seller_city": s.seller_city,
+            "is_in_stock": s.is_in_stock,
+            "is_promoted": s.is_promoted,
         }
         for s in result.scalars().all()
     ]
