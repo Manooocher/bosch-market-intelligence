@@ -15,7 +15,6 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_DIR = BASE_DIR / "data"
 COOKIE_DIR = DATA_DIR / "cookies"
-PROXY_HEALTH_DB = DATA_DIR / "proxy_health.db"
 METRICS_FILE = DATA_DIR / "metrics.json"
 RECOVERY_OUTPUT_DIR = DATA_DIR / "recovered"
 DAILY_OUTPUT_DIR = DATA_DIR / "daily"

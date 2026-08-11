@@ -8,6 +8,7 @@ Requires .env file with proxy and Tabdeal configuration.
 
 import atexit
 import logging
+import os
 import signal
 import sys
 from pathlib import Path
@@ -61,12 +62,9 @@ def main():
         return 3
 
     # ── 4. Create backup ───────────────────────────────────────────────
-    logger.info("Creating pre-run backups...")
+    logger.info("Creating pre-run PostgreSQL backup...")
     backup = BackupManager()
-    for db_name in ["watch_list.db", "monitor_store.db", "proxy_health.db"]:
-        db_path = f"data/{db_name}"
-        if os.path.exists(db_path):
-            backup.create_backup(db_path, name=db_name)
+    backup.dump_postgres()
     backup.cleanup_old_backups()
 
     # ── 5. Initialize infrastructure ───────────────────────────────────

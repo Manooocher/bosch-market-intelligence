@@ -1,8 +1,11 @@
 """SQLAlchemy base configuration for PostgreSQL async engine."""
 
 import os
+from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import DeclarativeBase
+
+load_dotenv()  # ensure .env is applied regardless of how the app is launched
 
 DB_URL = os.getenv(
     "DB_URL",

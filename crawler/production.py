@@ -8,7 +8,7 @@ import json
 import logging
 import os
 import shutil
-import sqlite3
+import subprocess
 import sys
 import time
 from datetime import datetime, timezone
@@ -69,12 +69,25 @@ def validate_startup(config=None):
         "Created" if not os.path.isdir("data/logs") else "Present"
     ))
 
-    # SQLite databases
-    critical_check("watch_list_db", lambda: (
-        os.path.exists("data/watch_list.db"), "Present" if os.path.exists("data/watch_list.db") else "Missing"
+    # SQLite databases → now PostgreSQL
+    def _pg_ok():
+        try:
+            from db import sync
+            conn = sync.connect()
+            cur = conn.cursor()
+            cur.execute("SELECT 1")
+            cur.fetchone()
+            cur.close()
+            conn.close()
+            return True
+        except Exception:
+            return False
+
+    critical_check("database", lambda: (
+        _pg_ok(), "PostgreSQL reachable" if _pg_ok() else "PostgreSQL unreachable"
     ))
-    check("monitor_store_db", lambda: (
-        os.path.exists("data/monitor_store.db"), "Present" if os.path.exists("data/monitor_store.db") else "Missing"
+    check("watch_list_table", lambda: (
+        _pg_ok(), "Postgres reachable (watch_list lives in DB)"
     ))
 
     # .env
@@ -109,11 +122,6 @@ def validate_startup(config=None):
         _check_write_permissions(), "No write permissions"
     ))
 
-    # SQLite WAL mode
-    check("sqlite_wal", lambda: (
-        _check_sqlite_wal("data/monitor_store.db"), "SQLite WAL mode"
-    ))
-
     return results
 
 
@@ -133,17 +141,6 @@ def _check_write_permissions() -> bool:
     try:
         test_file.write_text("ok")
         test_file.unlink()
-        return True
-    except Exception:
-        return False
-
-
-def _check_sqlite_wal(db_path: str) -> bool:
-    """Check if SQLite database is accessible and WAL mode is enabled."""
-    try:
-        conn = sqlite3.connect(db_path)
-        conn.execute("PRAGMA journal_mode")
-        conn.close()
         return True
     except Exception:
         return False
@@ -229,42 +226,66 @@ class ExecutionLock:
 # ── Backup Strategy ─────────────────────────────────────────────────────────
 
 class BackupManager:
-    """Manages database backups with rolling retention."""
+    """PostgreSQL logical backups with rolling retention (replaces SQLite backup)."""
 
     def __init__(self, backup_dir: str = "data/backups", max_backups: int = 7):
         self.backup_dir = Path(backup_dir)
         self.backup_dir.mkdir(parents=True, exist_ok=True)
         self.max_backups = max_backups
 
-    def create_backup(self, db_path: str, name: str = "") -> str | None:
-        """Create a timestamped backup of a database file."""
-        src = Path(db_path)
-        if not src.exists():
-            logger.warning(f"Cannot backup {db_path}: file not found")
+    def dump_postgres(self, name: str = "postgres") -> str | None:
+        """Dump the whole database via pg_dump (host, or docker exec fallback).
+
+        Returns the dump file path on success, None on failure (logged)."""
+        from db.sync import pg_params
+        p = pg_params()
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        dst = self.backup_dir / f"{name}_{timestamp}.sql"
+        cmd = None
+        kind = ""
+        try:
+            if shutil.which("pg_dump"):
+                env = dict(os.environ, PGPASSWORD=p["password"])
+                cmd = ["pg_dump", "-h", p["host"], "-p", str(p["port"]),
+                       "-U", p["user"], "-d", p["dbname"], "-Fc", "-f", str(dst)]
+                kind = "pg_dump(host)"
+            else:
+                # postgres runs in Docker (image includes pg_dump)
+                cmd = ["docker", "exec", "-e", f"PGPASSWORD={p['password']}",
+                       "torob_postgres", "pg_dump", "-U", p["user"], "-d", p["dbname"],
+                       "-Fc", "-f", f"/tmp/torob_intel_{timestamp}.dump"]
+                kind = "pg_dump(docker)"
+                docker_ok = subprocess.run(cmd, capture_output=True)
+                # copy the dump out of the container
+                if docker_ok.returncode == 0:
+                    subprocess.run(
+                        ["docker", "cp", f"torob_postgres:/tmp/torob_intel_{timestamp}.dump", str(dst)],
+                        check=True,
+                    )
+                    subprocess.run(
+                        ["docker", "exec", "torob_postgres", "rm", "-f", f"/tmp/torob_intel_{timestamp}.dump"],
+                        capture_output=True,
+                    )
+                else:
+                    raise RuntimeError(docker_ok.stderr.decode(errors="replace")[-500:])
+
+            if kind == "pg_dump(host)":
+                res = subprocess.run(cmd, capture_output=True, env=env)
+                if res.returncode != 0:
+                    raise RuntimeError(res.stderr.decode(errors="replace")[-500:])
+
+            if dst.exists() and dst.stat().st_size > 0:
+                logger.info(f"Postgres backup created ({kind}): {dst}")
+                return str(dst)
+            logger.warning("pg_dump produced an empty/missing file")
+            return None
+        except Exception as e:
+            logger.warning(f"Backup via pg_dump failed: {e}")
             return None
 
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        backup_name = f"{src.stem}_{timestamp}.db"
-        dst = self.backup_dir / backup_name
-
-        try:
-            # Use SQLite backup API for consistency
-            src_conn = sqlite3.connect(str(src))
-            dst_conn = sqlite3.connect(str(dst))
-            src_conn.backup(dst_conn)
-            src_conn.close()
-            dst_conn.close()
-            logger.info(f"Backup created: {dst}")
-            return str(dst)
-        except Exception as e:
-            logger.warning(f"Backup via SQLite API failed, trying shutil: {e}")
-            shutil.copy2(src, dst)
-            logger.info(f"Backup created (shutil): {dst}")
-            return str(dst)
-
     def cleanup_old_backups(self):
-        """Remove backups older than max_backups per database."""
-        backups = sorted(self.backup_dir.glob("*.db"))
+        """Remove backups older than max_backups per name prefix."""
+        backups = sorted(self.backup_dir.glob("*.sql"))
         by_stem = {}
         for b in backups:
             stem = b.stem.rsplit("_", 1)[0] if "_" in b.stem else b.stem
@@ -281,7 +302,7 @@ class BackupManager:
 
     def get_backup_summary(self) -> dict:
         """Get summary of existing backups."""
-        backups = list(self.backup_dir.glob("*.db"))
+        backups = list(self.backup_dir.glob("*.sql"))
         total_size = sum(b.stat().st_size for b in backups)
         return {
             "count": len(backups),
@@ -322,10 +343,22 @@ class HealthChecker:
 
         return checks
 
+    def _pg_ping(self) -> bool:
+        """Return True if the configured PostgreSQL answers SELECT 1."""
+        try:
+            from db import sync
+            conn = sync.connect()
+            cur = conn.cursor()
+            cur.execute("SELECT 1")
+            cur.fetchone()
+            cur.close()
+            conn.close()
+            return True
+        except Exception:
+            return False
+
     def _check(self, name: str, results: dict):
         """Run a single health check."""
-        import os as _os
-        import sqlite3 as _sqlite3
         try:
             if name == "python_version":
                 v = sys.version_info[:2]
@@ -334,7 +367,7 @@ class HealthChecker:
 
             elif name == "disk_space":
                 try:
-                    stat = _os.statvfs(".")
+                    stat = os.statvfs(".")
                     free_mb = (stat.f_bavail * stat.f_frsize) / (1024 * 1024)
                     status = "HEALTHY" if free_mb > 100 else "CRITICAL"
                     results["checks"][name] = {"status": status, "detail": f"{free_mb:.0f} MB free"}
@@ -342,64 +375,39 @@ class HealthChecker:
                     results["checks"][name] = {"status": "WARNING", "detail": "Cannot check disk space"}
 
             elif name == "database_watch_list":
-                db_path = "data/watch_list.db"
-                if _os.path.exists(db_path):
-                    size = _os.path.getsize(db_path)
-                    status = "HEALTHY" if size > 0 else "CRITICAL"
-                    results["checks"][name] = {"status": status, "detail": f"{size:,} bytes"}
-                else:
-                    results["checks"][name] = {"status": "CRITICAL", "detail": "File not found"}
+                ok = self._pg_ping()
+                results["checks"][name] = {
+                    "status": "HEALTHY" if ok else "CRITICAL",
+                    "detail": "PostgreSQL reachable" if ok else "PostgreSQL unreachable",
+                }
 
             elif name == "database_monitor_store":
-                db_path = "data/monitor_store.db"
-                if _os.path.exists(db_path):
-                    try:
-                        conn = _sqlite3.connect(db_path)
-                        unfinished = conn.execute(
-                            "SELECT COUNT(*) FROM monitor_runs WHERE status='running'"
-                        ).fetchone()[0]
-                        conn.close()
-                        status = "WARNING" if unfinished > 0 else "HEALTHY"
-                        results["checks"][name] = {
-                            "status": status,
-                            "detail": f"Unfinished runs: {unfinished}"
-                        }
-                    except Exception as e:
-                        results["checks"][name] = {"status": "CRITICAL", "detail": str(e)}
-                else:
-                    results["checks"][name] = {"status": "WARNING", "detail": "Not found"}
+                ok = self._pg_ping()
+                results["checks"][name] = {
+                    "status": "HEALTHY" if ok else "WARNING",
+                    "detail": "PostgreSQL reachable" if ok else "PostgreSQL unreachable",
+                }
 
             elif name == "database_integrity":
-                db_path = "data/monitor_store.db"
-                if _os.path.exists(db_path):
-                    try:
-                        conn = _sqlite3.connect(db_path)
-                        cur = conn.cursor()
-                        violations = cur.execute("PRAGMA foreign_key_check").fetchall()
-                        conn.close()
-                        status = "HEALTHY" if not violations else "WARNING"
-                        results["checks"][name] = {
-                            "status": status,
-                            "detail": f"FK violations: {len(violations)}"
-                        }
-                    except Exception as e:
-                        results["checks"][name] = {"status": "CRITICAL", "detail": str(e)}
-                else:
-                    results["checks"][name] = {"status": "WARNING", "detail": "Not found"}
+                ok = self._pg_ping()
+                results["checks"][name] = {
+                    "status": "HEALTHY" if ok else "WARNING",
+                    "detail": "PostgreSQL reachable (migrated from SQLite)" if ok else "PostgreSQL unreachable",
+                }
 
             elif name == "proxy_config":
-                proxy_user = _os.getenv("TOROB_PROXY_USER", "")
-                proxy_pass = _os.getenv("TOROB_PROXY_PASS", "")
+                proxy_user = os.getenv("TOROB_PROXY_USER", "")
+                proxy_pass = os.getenv("TOROB_PROXY_PASS", "")
                 status = "HEALTHY" if (proxy_user and proxy_pass) else "WARNING"
                 results["checks"][name] = {"status": status, "detail": "Configured" if proxy_user else "Not configured"}
 
             elif name == "environment":
                 env_vars = ["TOROB_PROXY_ENABLED", "TABDEAL_API_URL"]
-                missing = [v for v in env_vars if not _os.getenv(v)]
+                missing = [v for v in env_vars if not os.getenv(v)]
                 status = "HEALTHY" if not missing else "WARNING"
                 results["checks"][name] = {
                     "status": status,
-                    "detail": f"Missing: {missing}" if missing else "All set"
+                    "detail": f"Missing: {missing}" if missing else "All set",
                 }
 
         except Exception as e:

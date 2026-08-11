@@ -33,7 +33,8 @@ logger = logging.getLogger("matcher.main")
 BASE_DIR = Path(__file__).resolve().parent.parent
 TOROB_CSV = BASE_DIR / "data" / "bosch_products_links.final.csv"
 NABKADE_CSV = BASE_DIR / "nabkade_products.csv"
-DB_PATH = BASE_DIR / "data" / "watch_list.db"
+# WatchListStore writes directly to PostgreSQL — no local .db file target.
+STORE_TARGET = "postgresql"
 REVIEW_CSV = BASE_DIR / "data" / "review_queue.csv"
 QA_REPORT = BASE_DIR / "data" / "matcher_qa_report.md"
 
@@ -70,8 +71,7 @@ def run() -> None:
 
     # ── Open store ──────────────────────────────────────────────────────
 
-    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
-    store = WatchListStore(str(DB_PATH))
+    store = WatchListStore(STORE_TARGET)
 
     # ── Matching loop ───────────────────────────────────────────────────
 

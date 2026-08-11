@@ -37,7 +37,8 @@ async def list_products(
     query = query.offset((page - 1) * per_page).limit(per_page)
 
     result = await session.execute(query)
-    products = [dict(row._mapping) for row in result.all()]
+    cols = [c.name for c in LatestPrice.__table__.columns]
+    products = [{c: getattr(row, c) for c in cols} for row in result.scalars().all()]
 
     return {
         "pagination": {
@@ -81,7 +82,8 @@ async def get_product(
     for i in range(4):
         lo = min_p + i * bucket
         hi = min_p + (i + 1) * bucket if i < 3 else max_p
-        count = sum(1 for s in sellers if lo <= (s.price_rial or 0) < hi)
+        count = sum(1 for s in sellers if lo <= (s.price_rial or 0) < hi) if i < 3 \
+            else sum(1 for s in sellers if lo <= (s.price_rial or 0) <= hi)
         distribution.append({"range": f"{lo//1000000}M-{hi//1000000}M", "count": count})
 
     freshness = "unknown"

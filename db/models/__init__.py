@@ -60,6 +60,10 @@ class SellerSnapshot(Base):
     seller_id = Column(String(100), nullable=False)
     seller_name = Column(String(500))
     price_rial = Column(BigInteger, default=0)
+    original_price_rial = Column(BigInteger, default=0)
+    has_discount = Column(Boolean, default=False)
+    shipping_cost = Column(BigInteger, default=0)
+    offer_url = Column(Text)
     seller_score = Column(Integer, default=0)
     seller_city = Column(String(200))
     warranty_info = Column(Text)
@@ -125,9 +129,13 @@ class WatchListProduct(Base):
     preferred_torob_id = Column(String(255))
     preferred_torob_url = Column(Text)
     preferred_torob_title = Column(Text)
+    all_torob_ids = Column(Text, default="[]")
+    match_count = Column(Integer, default=0)
+    confidence_score = Column(Numeric(10, 4), default=0.0)
     confidence_level = Column(String(20), default="none")
     match_method = Column(String(50), default="none")
     status = Column(String(20), default="no_match")
+    review_state = Column(String(30), default="auto_accepted")
     created_at = Column(DateTime(timezone=True))
     updated_at = Column(DateTime(timezone=True))
 
@@ -140,3 +148,85 @@ class ProductStatus(Base):
     detected_at = Column(DateTime(timezone=True))
     last_successful_fetch = Column(DateTime(timezone=True))
     error_detail = Column(Text)
+
+
+class MonitorLog(Base):
+    """Event log for monitor runs (previously SQLite monitor_log)."""
+    __tablename__ = "monitor_log"
+    __table_args__ = (Index("idx_monitor_log_run", "monitor_run_id"),)
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    monitor_run_id = Column(Integer, nullable=False)
+    nabkade_product_id = Column(String(255))
+    event = Column(String(50))
+    detail = Column(Text)
+    timestamp = Column(DateTime(timezone=True), nullable=False)
+
+
+class ProxySession(Base):
+    """Proxy session health tracking (previously SQLite proxy_sessions)."""
+    __tablename__ = "proxy_sessions"
+
+    session_id = Column(String(100), primary_key=True)
+    created_at = Column(DateTime(timezone=True), nullable=False)
+    last_used = Column(DateTime(timezone=True))
+    request_count = Column(Integer, default=0)
+    success_count = Column(Integer, default=0)
+    error_490_count = Column(Integer, default=0)
+    error_429_count = Column(Integer, default=0)
+    error_5xx_count = Column(Integer, default=0)
+    timeout_count = Column(Integer, default=0)
+    total_latency_ms = Column(BigInteger, default=0)
+    is_quarantined = Column(Boolean, default=False)
+    quarantine_reason = Column(Text, default="")
+    quarantine_until = Column(DateTime(timezone=True))
+
+
+class MatchCandidate(Base):
+    """Scored match candidates (previously SQLite match_candidates)."""
+    __tablename__ = "match_candidates"
+    __table_args__ = (
+        Index("idx_candidates_nabkade", "nabkade_product_id"),
+        Index("idx_candidates_torob", "torob_product_id"),
+    )
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nabkade_product_id = Column(String(255), nullable=False)
+    torob_product_id = Column(String(255), nullable=False)
+    score = Column(Numeric(10, 4), default=0.0)
+    signals = Column(Text)
+    match_source = Column(String(50))
+    rank = Column(Integer, default=0)
+    created_at = Column(DateTime(timezone=True))
+
+
+class ReviewQueue(Base):
+    """Products requiring manual review (previously SQLite review_queue)."""
+    __tablename__ = "review_queue"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nabkade_product_id = Column(String(255))
+    nabkade_title = Column(Text)
+    nabkade_url = Column(Text)
+    nabkade_price = Column(String(50))
+    candidate_list = Column(Text)
+    confidence_score = Column(Numeric(10, 4), default=0.0)
+    confidence_level = Column(String(20), default="low")
+    review_reason = Column(Text)
+    status = Column(String(20), default="pending")
+    reviewer = Column(String(100))
+    notes = Column(Text)
+    created_at = Column(DateTime(timezone=True))
+    reviewed_at = Column(DateTime(timezone=True))
+
+
+class MatchingLog(Base):
+    """Audit trail of matcher decisions (previously SQLite matching_logs)."""
+    __tablename__ = "matching_logs"
+    __table_args__ = (Index("idx_logs_nabkade", "nabkade_product_id"),)
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    nabkade_product_id = Column(String(255))
+    action = Column(String(50))
+    details = Column(Text)
+    timestamp = Column(DateTime(timezone=True))

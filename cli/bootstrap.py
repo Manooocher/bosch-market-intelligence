@@ -54,12 +54,10 @@ def main():
         return 3
 
     # ── Create backup ──────────────────────────────────────────────────
-    logger.info("Creating pre-run backups...")
+    logger.info("Creating pre-run PostgreSQL backup...")
     backup = BackupManager()
-    for db_name in ["watch_list.db", "torob.sqlite3"]:
-        db_path = f"data/{db_name}"
-        if os.path.exists(db_path):
-            backup.create_backup(db_path, name=db_name)
+    backup.dump_postgres()
+    backup.cleanup_old_backups()
 
     # ── Initialize infrastructure ──────────────────────────────────────
     logger.info("Initializing infrastructure...")
