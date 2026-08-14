@@ -10,7 +10,6 @@ import {
   Margin,
   RawPagination,
 } from './types';
-import { buildTorobUrl, inferCategory } from '../utils/categories';
 
 /** Hours between a timestamp and now (null if unparseable). */
 export function freshnessHours(iso: string | null): number | null {
@@ -32,18 +31,17 @@ export function mapPagination<T>(pagination: RawPagination, items: T[]): Paginat
 
 /**
  * Transform a raw product list item into the UI shape.
- * Fields `category` and `torob_url` are DERIVED client-side because the backend
- * does not provide them. Margin fields are merged by SKU when available.
+ * category, torob_url, and margin fields now come directly from the backend.
  */
-export function mapProductItem(raw: RawProductItem, margin: RawMargin | null): ProductListItem {
+export function mapProductItem(raw: RawProductItem): ProductListItem {
   return {
     ...raw,
-    category: inferCategory(raw.sku, raw.title),
-    torob_url: buildTorobUrl(raw.torob_product_id),
+    category: raw.category ?? 'دسته‌بندی نشده',
+    torob_url: raw.torob_url ?? '',
     freshness_hours: freshnessHours(raw.last_fetched_at),
-    margin_vs_min_pct: margin?.margin_vs_min_pct ?? null,
-    margin_vs_min_rial: margin?.margin_vs_min_toman ?? null,
-    is_profitable: margin?.is_profitable ?? null,
+    margin_vs_min_pct: raw.margin_vs_min_pct,
+    margin_vs_min_rial: raw.margin_vs_min_rial,
+    is_profitable: raw.margin_vs_min_rial != null && raw.margin_vs_min_rial > 0,
   };
 }
 
@@ -66,7 +64,8 @@ export function mapProductDetail(raw: RawProductDetail, sellersRaw: RawSeller[])
     torob_product_id: raw.torob_product_id,
     sku: raw.sku,
     title: raw.title,
-    category: inferCategory(raw.sku, raw.title),
+    // Product detail endpoint may not have category yet; fall back to empty
+    category: null,
     market_stats: {
       ...raw.market_stats,
       freshness_hours: freshnessHours(raw.market_stats.fetched_at),

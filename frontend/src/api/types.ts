@@ -15,6 +15,8 @@ export interface RawProductItem {
   torob_product_id: string;
   sku: string | null;
   title: string | null;
+  category: string | null;           // from backend DB (was: inferred client-side)
+  torob_url: string | null;          // from backend (was: built client-side)
   last_fetched_at: string | null;
   seller_count: number;
   min_price_rial: number;
@@ -26,6 +28,10 @@ export interface RawProductItem {
   avg_price_usd: number;
   median_price_usd: number;
   competition_score: number;
+  margin_vs_min_pct: number | null;      // from backend join
+  margin_vs_min_rial: number | null;     // from backend join
+  margin_vs_median_pct: number | null;   // from backend join
+  margin_vs_median_rial: number | null;  // from backend join
   updated_at: string | null;
 }
 
@@ -124,11 +130,7 @@ export interface RawHealth {
 
 export interface ProductListItem extends RawProductItem {
   // Derived by the adapter (not present in raw backend payload)
-  torob_url: string;
-  category: string; // inferred from SKU/title — backend has no category field
   freshness_hours: number | null;
-  margin_vs_min_pct: number | null;
-  margin_vs_min_rial: number | null;
   is_profitable: boolean | null;
 }
 
@@ -153,7 +155,7 @@ export interface ProductDetail {
   torob_product_id: string;
   sku: string | null;
   title: string | null;
-  category: string; // inferred
+  category: string | null;
   market_stats: RawMarketStats & { freshness_hours: number | null };
   price_distribution: { buckets: RawPriceBucket[] };
   sellers: Seller[];
