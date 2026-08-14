@@ -5,6 +5,7 @@ import { MarketOverviewPage } from './pages/MarketOverviewPage';
 import { ProductsPage } from './pages/ProductsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { MarginsPage } from './pages/MarginsPage';
+import { DataProbe } from './pages/_debug/DataProbe';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -22,6 +23,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
+          <Route path="/_debug/data" element={<DataProbe />} />
           <Route path="/" element={<AppLayout />}>
             <Route index element={<MarketOverviewPage />} />
             <Route path="products" element={<ProductsPage />} />
