@@ -1,13 +1,64 @@
 """Products endpoints — list and detail."""
 
+import logging
+from decimal import Decimal
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, desc, asc
 from db.base import get_session
-from db.models import LatestPrice, SellerSnapshot, MarketSnapshot
+from db.models import LatestPrice, SellerSnapshot, MarketSnapshot, WatchListProduct
 
+logger = logging.getLogger("api.routers.products")
 router = APIRouter(prefix="/api/products", tags=["products"])
+
+
+def _build_product_response(product: LatestPrice, nabkade_price_str: str | None = None) -> dict:
+    """Build a single product dict with category, torob_url, and margin fields."""
+    torob_url = f"https://torob.com/p/{product.torob_product_id}"
+
+    # Compute margin from nabkade price (in Toman) vs market prices (in Rial)
+    nabkade_toman = 0
+    if nabkade_price_str:
+        try:
+            nabkade_toman = int(nabkade_price_str.replace(",", "").replace("،", "").strip())
+        except (ValueError, AttributeError):
+            nabkade_toman = 0
+
+    min_rial = product.min_price_rial or 0
+    median_rial = product.median_price_rial or 0
+    min_toman = min_rial // 10 if min_rial else 0
+    median_toman = median_rial // 10 if median_rial else 0
+
+    margin_vs_min_rial = nabkade_toman - min_toman if nabkade_toman > 0 and min_toman > 0 else 0
+    margin_vs_median_rial = nabkade_toman - median_toman if nabkade_toman > 0 and median_toman > 0 else 0
+    margin_vs_min_pct = float(Decimal(str(margin_vs_min_rial)) / Decimal(str(nabkade_toman)) * 100) if nabkade_toman > 0 else 0.0
+    margin_vs_median_pct = float(Decimal(str(margin_vs_median_rial)) / Decimal(str(nabkade_toman)) * 100) if nabkade_toman > 0 else 0.0
+
+    return {
+        "nabkade_product_id": product.nabkade_product_id,
+        "torob_product_id": product.torob_product_id,
+        "sku": product.sku,
+        "title": product.title,
+        "category": product.category,
+        "torob_url": torob_url,
+        "last_fetched_at": str(product.last_fetched_at) if product.last_fetched_at else None,
+        "seller_count": product.seller_count or 0,
+        "min_price_rial": product.min_price_rial or 0,
+        "max_price_rial": product.max_price_rial or 0,
+        "avg_price_rial": product.avg_price_rial or 0,
+        "median_price_rial": product.median_price_rial or 0,
+        "min_price_usd": product.min_price_usd or 0,
+        "max_price_usd": product.max_price_usd or 0,
+        "avg_price_usd": product.avg_price_usd or 0,
+        "median_price_usd": product.median_price_usd or 0,
+        "competition_score": product.competition_score or 0,
+        "margin_vs_min_pct": round(margin_vs_min_pct, 1),
+        "margin_vs_min_rial": margin_vs_min_rial,
+        "margin_vs_median_pct": round(margin_vs_median_pct, 1),
+        "margin_vs_median_rial": margin_vs_median_rial,
+        "updated_at": str(product.updated_at) if product.updated_at else None,
+    }
 
 
 @router.get("")
@@ -18,13 +69,18 @@ async def list_products(
     sort_dir: str = Query("desc"),
     session: AsyncSession = Depends(get_session),
 ):
-    """Paginated list of products with sorting."""
-    query = select(LatestPrice)
+    """Paginated list of products with category, torob_url, and margin fields."""
 
     # Count total
     count_query = select(func.count(LatestPrice.nabkade_product_id))
     total = await session.scalar(count_query) or 0
     total_pages = max(1, (total + per_page - 1) // per_page)
+
+    # Build query with join to watch_list for nabkade_price (margin computation)
+    query = (
+        select(LatestPrice, WatchListProduct.nabkade_price)
+        .outerjoin(WatchListProduct, LatestPrice.nabkade_product_id == WatchListProduct.nabkade_product_id)
+    )
 
     # Apply sorting
     sort_col = getattr(LatestPrice, sort_by, LatestPrice.competition_score)
@@ -37,8 +93,13 @@ async def list_products(
     query = query.offset((page - 1) * per_page).limit(per_page)
 
     result = await session.execute(query)
-    cols = [c.name for c in LatestPrice.__table__.columns]
-    products = [{c: getattr(row, c) for c in cols} for row in result.scalars().all()]
+    rows = result.all()
+
+    products = []
+    for row in rows:
+        lp = row[0]  # LatestPrice
+        nabkade_price = row[1]  # WatchListProduct.nabkade_price or None
+        products.append(_build_product_response(lp, nabkade_price))
 
     return {
         "pagination": {

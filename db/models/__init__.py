@@ -97,6 +97,7 @@ class LatestPrice(Base):
     torob_product_id = Column(String(255), nullable=False)
     sku = Column(String(50))
     title = Column(Text)
+    category = Column(String(255))
     last_fetched_at = Column(DateTime(timezone=True))
     seller_count = Column(Integer, default=0)
     min_price_rial = Column(BigInteger, default=0)
