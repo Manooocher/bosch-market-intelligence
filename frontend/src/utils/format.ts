@@ -21,3 +21,8 @@ export function formatDate(dateStr: string | null): string {
     minute: '2-digit',
   }).format(date);
 }
+
+export function formatNumber(num: number | null | undefined): string {
+  if (num === null || num === undefined) return '—';
+  return new Intl.NumberFormat('fa-IR').format(num);
+}
