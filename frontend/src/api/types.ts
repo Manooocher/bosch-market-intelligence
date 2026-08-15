@@ -161,9 +161,7 @@ export interface ProductDetail extends ProductListItem {
   sellers: Seller[];
 }
 
-export interface Margin extends RawMargin {
-  // Pass-through from backend; raw already has all fields the UI needs.
-}
+export type Margin = RawMargin;
 
 export interface MarketOverview {
   total_products: number;
