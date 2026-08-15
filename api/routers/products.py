@@ -5,7 +5,7 @@ from decimal import Decimal
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func, desc, asc
+from sqlalchemy import select, func, desc, asc, or_
 from db.base import get_session
 from db.models import LatestPrice, SellerSnapshot, MarketSnapshot, WatchListProduct
 
@@ -67,12 +67,28 @@ async def list_products(
     per_page: int = Query(20, ge=1, le=100),
     sort_by: str = Query("competition_score"),
     sort_dir: str = Query("desc"),
+    search: str | None = Query(None),
+    category: str | None = Query(None),
     session: AsyncSession = Depends(get_session),
 ):
-    """Paginated list of products with category, torob_url, and margin fields."""
+    """Paginated list of products with category, torob_url, margin, search, and category filters."""
 
-    # Count total
+    # Build filter conditions (applied to both count and data queries)
+    filters = []
+    if search:
+        filters.append(
+            or_(
+                LatestPrice.title.ilike(f"%{search}%"),
+                LatestPrice.sku.ilike(f"%{search}%"),
+            )
+        )
+    if category:
+        filters.append(LatestPrice.category == category)
+
+    # Count total (respects filters)
     count_query = select(func.count(LatestPrice.nabkade_product_id))
+    if filters:
+        count_query = count_query.where(*filters)
     total = await session.scalar(count_query) or 0
     total_pages = max(1, (total + per_page - 1) // per_page)
 
@@ -81,6 +97,8 @@ async def list_products(
         select(LatestPrice, WatchListProduct.nabkade_price)
         .outerjoin(WatchListProduct, LatestPrice.nabkade_product_id == WatchListProduct.nabkade_product_id)
     )
+    if filters:
+        query = query.where(*filters)
 
     # Apply sorting
     sort_col = getattr(LatestPrice, sort_by, LatestPrice.competition_score)
