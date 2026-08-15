@@ -137,12 +137,17 @@ async def get_product(
 ):
     """Detailed product view with price distribution."""
     result = await session.execute(
-        select(LatestPrice).where(LatestPrice.torob_product_id == torob_id)
+        select(LatestPrice, WatchListProduct.nabkade_price)
+        .outerjoin(WatchListProduct, LatestPrice.nabkade_product_id == WatchListProduct.nabkade_product_id)
+        .where(LatestPrice.torob_product_id == torob_id)
     )
-    product = result.scalar_one_or_none()
+    row = result.one_or_none()
 
-    if not product:
+    if not row:
         return {"error": "Product not found", "torob_product_id": torob_id}
+
+    product = row[0]
+    nabkade_price = row[1]
 
     # Get sellers for this specific product (via its market snapshots)
     sellers_q = await session.execute(
@@ -175,10 +180,10 @@ async def get_product(
         else:
             freshness = "stale"
 
+    base = _build_product_response(product, nabkade_price)
+
     return {
-        "torob_product_id": torob_id,
-        "sku": product.sku,
-        "title": product.title,
+        **base,
         "market_stats": {
             "seller_count": product.seller_count or 0,
             "min_price_rial": product.min_price_rial or 0,
