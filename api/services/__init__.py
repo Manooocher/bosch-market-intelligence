@@ -70,8 +70,9 @@ class MarginCalculator:
 
         nabkade_rial = nabkade_price_toman * 10
         nabkade_usd_cents = int((Decimal(str(nabkade_rial)) * Decimal("100") / Decimal(str(self._rate))).quantize(Decimal("1")))
-        min_market_toman = market_min_rial // 10
-        median_market_toman = market_median_rial // 10
+        # Market prices are already stored in Toman (despite the _rial column name)
+        min_market_toman = market_min_rial
+        median_market_toman = market_median_rial
         margin_min = nabkade_price_toman - min_market_toman
         margin_median = nabkade_price_toman - median_market_toman
         pct_min = float(Decimal(str(margin_min)) / Decimal(str(nabkade_price_toman)) * 100) if nabkade_price_toman > 0 else 0.0
@@ -137,8 +138,9 @@ class MarginCalculator:
 
         nabkade_rial = nabkade_price_toman * 10
         nabkade_usd_cents = int((Decimal(str(nabkade_rial)) * Decimal("100") / Decimal(str(self._rate))).quantize(Decimal("1")))
-        min_market_toman = market_min_rial // 10
-        median_market_toman = market_median_rial // 10
+        # Market prices are already stored in Toman (despite the _rial column name)
+        min_market_toman = market_min_rial
+        median_market_toman = market_median_rial
         margin_min = nabkade_price_toman - min_market_toman
         margin_median = nabkade_price_toman - median_market_toman
         pct_min = float(Decimal(str(margin_min)) / Decimal(str(nabkade_price_toman)) * 100) if nabkade_price_toman > 0 else 0.0

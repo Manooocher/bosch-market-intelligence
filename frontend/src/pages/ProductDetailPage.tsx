@@ -89,7 +89,7 @@ export function ProductDetailPage() {
             sellers={sellers ?? []}
             nabkadePriceRial={
               product.margin_vs_min_rial != null && product.market_stats?.min_price_rial != null
-                ? (product.margin_vs_min_rial + Math.floor(product.market_stats.min_price_rial / 10)) * 10
+                ? product.margin_vs_min_rial + product.market_stats.min_price_rial
                 : null
             }
           />

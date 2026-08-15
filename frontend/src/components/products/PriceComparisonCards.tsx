@@ -17,8 +17,9 @@ function deriveNabkadeToman(product: ProductDetail): number | null {
   const minRial = product.market_stats?.min_price_rial ?? 0;
   const marginMin = product.margin_vs_min_rial;
   if (marginMin == null || minRial <= 0) return null;
-  // margin_vs_min_rial is in Toman; market min in Rial -> toman = rial / 10
-  return marginMin + Math.floor(minRial / 10);
+  // margin_vs_min_rial and market min are both stored in Toman (despite the
+  // _rial name), so nabkade = margin_vs_min + market_min (no /10 conversion).
+  return marginMin + minRial;
 }
 
 function marginBadge(pct: number | null): React.ReactNode {

@@ -25,10 +25,11 @@ def _build_product_response(product: LatestPrice, nabkade_price_str: str | None 
         except (ValueError, AttributeError):
             nabkade_toman = 0
 
+    # Market prices are already stored in Toman (despite the _rial column name)
     min_rial = product.min_price_rial or 0
     median_rial = product.median_price_rial or 0
-    min_toman = min_rial // 10 if min_rial else 0
-    median_toman = median_rial // 10 if median_rial else 0
+    min_toman = min_rial if min_rial else 0
+    median_toman = median_rial if median_rial else 0
 
     margin_vs_min_rial = nabkade_toman - min_toman if nabkade_toman > 0 and min_toman > 0 else 0
     margin_vs_median_rial = nabkade_toman - median_toman if nabkade_toman > 0 and median_toman > 0 else 0

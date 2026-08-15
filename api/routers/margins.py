@@ -26,8 +26,9 @@ def _compute_margin(lp: LatestPrice, nabkade_toman: int) -> dict:
     """Compute margin fields for a single product (in Toman)."""
     min_market = lp.min_price_rial or 0
     median_market = lp.median_price_rial or 0
-    min_toman = min_market // 10 if min_market else 0
-    median_toman = median_market // 10 if median_market else 0
+    # Market prices are already stored in Toman (despite the _rial column name)
+    min_toman = min_market if min_market else 0
+    median_toman = median_market if median_market else 0
 
     margin_min = nabkade_toman - min_toman if nabkade_toman > 0 and min_toman > 0 else 0
     margin_median = nabkade_toman - median_toman if nabkade_toman > 0 and median_toman > 0 else 0
