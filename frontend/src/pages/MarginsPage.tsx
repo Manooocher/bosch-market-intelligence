@@ -85,7 +85,7 @@ export function MarginsPage() {
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50">
                   <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">محصول</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">قیمت نبکاده</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">قیمت نابکده</th>
                   <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">کمینه بازار</th>
                   <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">میانه بازار</th>
                   <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">حاشیه کمینه</th>

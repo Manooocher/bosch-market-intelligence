@@ -42,7 +42,7 @@ export function PriceComparisonCards({ product }: PriceComparisonCardsProps) {
 
   const cards: CardData[] = [
     {
-      label: 'قیمت نبکاده',
+      label: 'قیمت نابکده',
       value: nabkadeToman != null ? formatNumber(nabkadeToman) : '—',
       sub: (
         <span className="text-xs text-slate-500">

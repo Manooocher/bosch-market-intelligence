@@ -83,7 +83,7 @@ export function PriceDistribution({
             stroke="#6366f1"
             strokeDasharray="5 5"
             label={{
-              value: 'قیمت نبکاده',
+              value: 'قیمت نابکده',
               position: 'top',
               fill: '#6366f1',
               fontSize: 11,

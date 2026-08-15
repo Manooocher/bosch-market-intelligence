@@ -38,7 +38,7 @@ export function ProductDetailHeader({ product }: ProductDetailHeaderProps) {
             className="inline-flex items-center gap-1.5 text-sm text-indigo-600 hover:text-indigo-800 font-medium"
           >
             <ExternalLink className="w-4 h-4" />
-            مشاهده در توروب
+            مشاهده در ترب
           </a>
         )}
         {product.last_fetched_at && (
