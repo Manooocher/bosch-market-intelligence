@@ -56,10 +56,7 @@ export interface RawPriceBucket {
   count: number;
 }
 
-export interface RawProductDetail {
-  torob_product_id: string;
-  sku: string | null;
-  title: string | null;
+export interface RawProductDetail extends RawProductItem {
   market_stats: RawMarketStats;
   price_distribution: { buckets: RawPriceBucket[] };
 }
@@ -81,15 +78,22 @@ export interface RawSellersResponse {
 
 export interface RawMargin {
   sku: string | null;
+  torob_product_id: string;
   title: string | null;
+  category: string | null;
+  torob_url: string | null;
   nabkade_price_toman: number;
   market_min_price_toman: number;
+  market_median_price_toman: number;
   margin_vs_min_toman: number;
+  margin_vs_median_toman: number;
   margin_vs_min_pct: number;
+  margin_vs_median_pct: number;
   is_profitable: boolean;
 }
 
 export interface RawMarginsResponse {
+  pagination: RawPagination;
   margins: RawMargin[];
 }
 
@@ -151,24 +155,14 @@ export interface Seller {
   is_advertisement: boolean; // mapped from raw.is_promoted
 }
 
-export interface ProductDetail {
-  torob_product_id: string;
-  sku: string | null;
-  title: string | null;
-  category: string | null;
+export interface ProductDetail extends ProductListItem {
   market_stats: RawMarketStats & { freshness_hours: number | null };
   price_distribution: { buckets: RawPriceBucket[] };
   sellers: Seller[];
 }
 
-export interface Margin {
-  sku: string | null;
-  title: string | null;
-  nabkade_price_toman: number;
-  market_min_price_toman: number;
-  margin_vs_min_toman: number;
-  margin_vs_min_pct: number;
-  is_profitable: boolean;
+export interface Margin extends RawMargin {
+  // Pass-through from backend; raw already has all fields the UI needs.
 }
 
 export interface MarketOverview {

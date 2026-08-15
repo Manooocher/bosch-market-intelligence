@@ -61,11 +61,7 @@ export function mapSeller(raw: RawSeller): Seller {
 /** Combine raw detail + sellers into a full UI detail object. */
 export function mapProductDetail(raw: RawProductDetail, sellersRaw: RawSeller[]): ProductDetail {
   return {
-    torob_product_id: raw.torob_product_id,
-    sku: raw.sku,
-    title: raw.title,
-    // Product detail endpoint may not have category yet; fall back to empty
-    category: null,
+    ...mapProductItem(raw),
     market_stats: {
       ...raw.market_stats,
       freshness_hours: freshnessHours(raw.market_stats.fetched_at),

@@ -15,23 +15,3 @@ export function useProducts(params: ProductListParams = {}) {
     refetchOnReconnect: false,
   });
 }
-
-export function useProductDetail(torobId: string) {
-  return useQuery({
-    queryKey: ['product', torobId],
-    queryFn: () => productsApi.getDetail(torobId),
-    staleTime: STALE_TIME,
-    gcTime: CACHE_TIME,
-    enabled: !!torobId,
-  });
-}
-
-export function useProductSellers(torobId: string) {
-  return useQuery({
-    queryKey: ['product-sellers', torobId],
-    queryFn: () => productsApi.getSellers(torobId),
-    staleTime: STALE_TIME,
-    gcTime: CACHE_TIME,
-    enabled: !!torobId,
-  });
-}
