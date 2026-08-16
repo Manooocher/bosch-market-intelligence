@@ -1,19 +1,12 @@
-import { useRef, useCallback } from 'react';
-import {
-  useReactTable,
-  getCoreRowModel,
-  getSortedRowModel,
-  flexRender,
-  createColumnHelper,
-  type SortingState,
-  type OnChangeFn,
-} from '@tanstack/react-table';
-import { useVirtualizer } from '@tanstack/react-virtual';
+import { useReactTable, getCoreRowModel, getSortedRowModel, flexRender, createColumnHelper } from '@tanstack/react-table';
 import type { ProductListItem } from '../../api/types';
 import { TableSkeleton } from '../ui/Loading';
 import { ArrowUpDown } from 'lucide-react';
 import { formatPrice, formatNumber } from '../../utils/format';
 import { getCategoryLabelFromKey } from '../../utils/categories';
+import { getMarginColor } from '../../utils/colors';
+import type { SortingState, OnChangeFn } from '@tanstack/react-table';
+import { useNavigate } from 'react-router-dom';
 
 const columnHelper = createColumnHelper<ProductListItem>();
 
@@ -21,16 +14,13 @@ const columns = [
   columnHelper.accessor('title', {
     header: 'محصول',
     cell: (info) => (
-      <div>
-        <div className="font-medium text-slate-800 max-w-xs truncate" title={info.getValue() ?? ''}>
-          {info.getValue() ?? '—'}
-        </div>
-        <div className="text-xs text-slate-400" dir="ltr">
-          {info.row.original.sku ?? '—'}
-        </div>
+      <div className="flex flex-col">
+        <span className="font-medium text-slate-800">{info.getValue() ?? '—'}</span>
+        {info.row.original.sku && (
+          <span className="text-xs text-slate-500" dir="ltr">{info.row.original.sku}</span>
+        )}
       </div>
     ),
-    enableSorting: false,
   }),
   columnHelper.accessor('category', {
     header: 'دسته',
@@ -56,17 +46,8 @@ const columns = [
       const v = info.getValue() as number | null;
       if (v == null) return <span>—</span>;
       return (
-        <span
-          className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-            v > 10
-              ? 'bg-emerald-100 text-emerald-700'
-              : v >= 0
-                ? 'bg-amber-100 text-amber-700'
-                : 'bg-red-100 text-red-700'
-          }`}
-        >
-          {v > 0 ? '+' : ''}
-          {v.toFixed(1)}٪
+        <span className={`px-2 py-1 rounded text-xs font-medium ${getMarginColor(v)}`}>
+          {v > 0 ? '+' : ''}{v.toFixed(1)}%
         </span>
       );
     },
@@ -80,8 +61,9 @@ interface ProductTableProps {
   onSortingChange: OnChangeFn<SortingState>;
 }
 
-/** Virtualized product table — renders only viewport-visible rows (+ overscan). */
 export function ProductTable({ data, isLoading, sorting, onSortingChange }: ProductTableProps) {
+  const navigate = useNavigate();
+
   const table = useReactTable({
     data,
     columns,
@@ -92,70 +74,53 @@ export function ProductTable({ data, isLoading, sorting, onSortingChange }: Prod
     manualSorting: true,
   });
 
-  const rows = table.getRowModel().rows;
-  const tableContainerRef = useRef<HTMLDivElement>(null);
-
-  const rowVirtualizer = useVirtualizer({
-    count: rows.length,
-    getScrollElement: useCallback(() => tableContainerRef.current, []),
-    estimateSize: () => 60,
-    overscan: 12,
-  });
+  if (isLoading) return <TableSkeleton />;
+  if (!data || data.length === 0) {
+    return (
+      <div className="py-12 text-center text-slate-500">
+        <p>محصولی یافت نشد</p>
+      </div>
+    );
+  }
 
   return (
-    <div
-      className="overflow-auto relative"
-      ref={tableContainerRef}
-      style={{ maxHeight: '70vh' }}
-    >
-      <table className="w-full border-collapse" style={{ height: `${rowVirtualizer.getTotalSize()}px`, tableLayout: 'fixed' }}>
-        <thead>
+    <div className="overflow-auto border border-slate-200 rounded-lg" style={{ maxHeight: '75vh' }}>
+      <table className="w-full border-collapse">
+        <thead className="bg-slate-50 sticky top-0 z-10">
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="sticky top-0 border-b border-slate-200 bg-slate-50 z-10">
+            <tr key={headerGroup.id}>
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="px-4 py-3 text-right text-xs font-semibold text-slate-500 whitespace-nowrap"
+                  className="px-4 py-3 text-right text-sm font-medium text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                  onClick={header.column.getToggleSortingHandler()}
                 >
-                  {header.isPlaceholder ? null : header.column.getCanSort() ? (
-                    <button
-                      className="inline-flex items-center gap-1 hover:text-indigo-600"
-                      onClick={header.column.getToggleSortingHandler()}
-                    >
-                      {flexRender(header.column.columnDef.header, header.getContext())}
-                      <ArrowUpDown className="w-3.5 h-3.5" />
-                    </button>
-                  ) : (
-                    flexRender(header.column.columnDef.header, header.getContext())
-                  )}
+                  <div className="flex items-center gap-1">
+                    {flexRender(header.column.columnDef.header, header.getContext())}
+                    {header.column.getIsSorted() && (
+                      <ArrowUpDown className="w-3 h-3 text-indigo-600" />
+                    )}
+                  </div>
                 </th>
               ))}
             </tr>
           ))}
         </thead>
-        {isLoading ? (
-          <TableSkeleton cols={6} rows={10} />
-        ) : (
-          <tbody>
-            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-              const row = rows[virtualRow.index];
-              return (
-                <tr
-                  key={row.id}
-                  onClick={() => window.location.assign(`/products/${row.original.torob_product_id}`)}
-                  className="border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors"
-                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', transform: `translateY(${virtualRow.start}px)` }}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id} className="px-4 py-3 text-sm align-middle">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
-          </tbody>
-        )}
+        <tbody>
+          {table.getRowModel().rows.map((row) => (
+            <tr
+              key={row.id}
+              className="border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors"
+              onClick={() => navigate(`/products/${row.original.torob_product_id}`)}
+            >
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id} className="px-4 py-3 text-sm">
+                  {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
       </table>
     </div>
   );
