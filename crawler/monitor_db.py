@@ -156,7 +156,9 @@ class MonitorDB:
                         s.get("seller_city", ""),
                         s.get("warranty_info", ""),
                         bool(s.get("is_promoted", False)),
-                        s.get("extra_info_json", ""),
+                        # extra_info_json is JSONB; an empty string is invalid JSON.
+                        # Coerce "" -> NULL (JSONB accepts NULL).
+                        s.get("extra_info_json") or None,
                     ),
                 )
             self.conn.commit()
