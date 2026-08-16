@@ -21,15 +21,15 @@ export interface ProductListParams {
 
 export const productsApi = {
   /**
-   * List products (server-side paginated). Margin fields, category, and torob_url
-   * are now returned directly by the backend — no more client-side inference or
-   * secondary margin fetch.
+   * List products. By default the backend returns ALL matching products in one
+   * response (the dashboard virtualizes client-side). Pass per_page only to opt
+   * in to server-side pagination.
    */
   getList: async (params: ProductListParams = {}): Promise<Paginated<ProductListItem>> => {
     const res = await apiClient.get<RawProductsResponse>('/api/products', {
       params: {
-        page: params.page ?? 1,
-        per_page: params.per_page ?? 50,
+        ...(params.page ? { page: params.page } : {}),
+        ...(params.per_page ? { per_page: params.per_page } : {}),
         ...(params.sort_by ? { sort_by: params.sort_by } : {}),
         ...(params.sort_dir ? { sort_dir: params.sort_dir } : {}),
         ...(params.search ? { search: params.search } : {}),

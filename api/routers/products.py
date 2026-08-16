@@ -65,15 +65,19 @@ def _build_product_response(product: LatestPrice, nabkade_price_str: str | None 
 @router.get("")
 async def list_products(
     page: int = Query(1, ge=1),
-    per_page: int = Query(20, ge=1, le=100),
+    per_page: int | None = Query(None, ge=1, le=1000),
     sort_by: str = Query("competition_score"),
     sort_dir: str = Query("desc"),
     search: str | None = Query(None),
     category: str | None = Query(None),
     session: AsyncSession = Depends(get_session),
 ):
-    """Paginated list of products with category, torob_url, margin, search, and category filters."""
+    """List products.
 
+    By default returns ALL products matching filters in one response
+    (the dashboard virtualizes client-side). Pagination is only applied when
+    the client explicitly passes `per_page`.
+    """
     # Build filter conditions (applied to both count and data queries)
     filters = []
     if search:
@@ -91,7 +95,6 @@ async def list_products(
     if filters:
         count_query = count_query.where(*filters)
     total = await session.scalar(count_query) or 0
-    total_pages = max(1, (total + per_page - 1) // per_page)
 
     # Build query with join to watch_list for nabkade_price (margin computation)
     query = (
@@ -108,8 +111,10 @@ async def list_products(
     else:
         query = query.order_by(desc(sort_col))
 
-    # Apply pagination
-    query = query.offset((page - 1) * per_page).limit(per_page)
+    # Pagination only if explicitly requested
+    pagination_disabled = per_page is None
+    if not pagination_disabled:
+        query = query.offset((page - 1) * per_page).limit(per_page)
 
     result = await session.execute(query)
     rows = result.all()
@@ -120,6 +125,19 @@ async def list_products(
         nabkade_price = row[1]  # WatchListProduct.nabkade_price or None
         products.append(_build_product_response(lp, nabkade_price))
 
+    if pagination_disabled:
+        return {
+            "pagination": {
+                "page": 1,
+                "per_page": total or 1,
+                "total": total,
+                "total_pages": 1,
+            },
+            "pagination_disabled": True,
+            "products": products,
+        }
+
+    total_pages = max(1, (total + per_page - 1) // per_page)
     return {
         "pagination": {
             "page": page,
@@ -127,6 +145,7 @@ async def list_products(
             "total": total,
             "total_pages": total_pages,
         },
+        "pagination_disabled": False,
         "products": products,
     }
 

@@ -1,3 +1,4 @@
+import { useRef, useCallback } from 'react';
 import {
   useReactTable,
   getCoreRowModel,
@@ -7,8 +8,8 @@ import {
   type SortingState,
   type OnChangeFn,
 } from '@tanstack/react-table';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import type { ProductListItem } from '../../api/types';
-import { ProductRow } from './ProductRow';
 import { TableSkeleton } from '../ui/Loading';
 import { ArrowUpDown } from 'lucide-react';
 import { formatPrice, formatNumber } from '../../utils/format';
@@ -34,25 +35,25 @@ const columns = [
   columnHelper.accessor('category', {
     header: 'دسته',
     enableSorting: false,
-    cell: (info) => <span className="text-slate-600">{getCategoryLabelFromKey(info.getValue())}</span>,
+    cell: (info) => <span className="text-slate-600">{getCategoryLabelFromKey(info.getValue() as string)}</span>,
   }),
   columnHelper.accessor('seller_count', {
     header: 'فروشنده',
-    cell: (info) => <span dir="ltr">{formatNumber(info.getValue())}</span>,
+    cell: (info) => <span dir="ltr">{formatNumber(info.getValue() as number)}</span>,
   }),
   columnHelper.accessor('min_price_rial', {
     header: 'حداقل قیمت',
-    cell: (info) => <span dir="ltr">{formatPrice(info.getValue())}</span>,
+    cell: (info) => <span dir="ltr">{formatPrice(info.getValue() as number)}</span>,
   }),
   columnHelper.accessor('median_price_rial', {
     header: 'قیمت میانه',
-    cell: (info) => <span dir="ltr">{formatPrice(info.getValue())}</span>,
+    cell: (info) => <span dir="ltr">{formatPrice(info.getValue() as number)}</span>,
   }),
   columnHelper.accessor('margin_vs_min_pct', {
     header: 'حاشیه %',
     enableSorting: false,
     cell: (info) => {
-      const v = info.getValue();
+      const v = info.getValue() as number | null;
       if (v == null) return <span>—</span>;
       return (
         <span
@@ -79,7 +80,7 @@ interface ProductTableProps {
   onSortingChange: OnChangeFn<SortingState>;
 }
 
-/** TanStack Table v8 with server-side sorting; row click navigates to detail. */
+/** Virtualized product table — renders only viewport-visible rows (+ overscan). */
 export function ProductTable({ data, isLoading, sorting, onSortingChange }: ProductTableProps) {
   const table = useReactTable({
     data,
@@ -91,16 +92,30 @@ export function ProductTable({ data, isLoading, sorting, onSortingChange }: Prod
     manualSorting: true,
   });
 
+  const rows = table.getRowModel().rows;
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  const rowVirtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: useCallback(() => tableContainerRef.current, []),
+    estimateSize: () => 60,
+    overscan: 12,
+  });
+
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full">
+    <div
+      className="overflow-auto relative"
+      ref={tableContainerRef}
+      style={{ maxHeight: '70vh' }}
+    >
+      <table className="w-full border-collapse" style={{ height: `${rowVirtualizer.getTotalSize()}px`, tableLayout: 'fixed' }}>
         <thead>
           {table.getHeaderGroups().map((headerGroup) => (
-            <tr key={headerGroup.id} className="border-b border-slate-200 bg-slate-50">
+            <tr key={headerGroup.id} className="sticky top-0 border-b border-slate-200 bg-slate-50 z-10">
               {headerGroup.headers.map((header) => (
                 <th
                   key={header.id}
-                  className="px-4 py-3 text-right text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap"
+                  className="px-4 py-3 text-right text-xs font-semibold text-slate-500 whitespace-nowrap"
                 >
                   {header.isPlaceholder ? null : header.column.getCanSort() ? (
                     <button
@@ -122,9 +137,23 @@ export function ProductTable({ data, isLoading, sorting, onSortingChange }: Prod
           <TableSkeleton cols={6} rows={10} />
         ) : (
           <tbody>
-            {table.getRowModel().rows.map((row) => (
-              <ProductRow key={row.id} row={row} />
-            ))}
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const row = rows[virtualRow.index];
+              return (
+                <tr
+                  key={row.id}
+                  onClick={() => window.location.assign(`/products/${row.original.torob_product_id}`)}
+                  className="border-b border-slate-100 hover:bg-slate-50 cursor-pointer transition-colors"
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', transform: `translateY(${virtualRow.start}px)` }}
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <td key={cell.id} className="px-4 py-3 text-sm align-middle">
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
           </tbody>
         )}
       </table>
