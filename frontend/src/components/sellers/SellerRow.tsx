@@ -1,7 +1,7 @@
 import type { Seller } from '../../api/types';
 import { formatPrice } from '../../utils/format';
 import { Badge } from '../ui/Badge';
-import { Star, CheckCircle2, XCircle, Megaphone, ExternalLink, AlertTriangle } from 'lucide-react';
+import { Star, CheckCircle2, XCircle, Megaphone, AlertTriangle } from 'lucide-react';
 
 interface SellerRowProps {
   seller: Seller;
@@ -84,21 +84,6 @@ export function SellerRow({ seller, rank, isCheapest }: SellerRowProps) {
           <span className="inline-flex items-center gap-1 text-red-500 text-sm">
             <XCircle className="w-4 h-4" /> ناموجود
           </span>
-        )}
-      </td>
-      <td className="px-4 py-3">
-        {seller.seller_page_url && (
-          <a
-            href={seller.seller_page_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
-            className="inline-flex items-center gap-1 text-indigo-600 hover:text-indigo-800 text-sm"
-            title="مشاهده فروشگاه در ترب"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-            مشاهده
-          </a>
         )}
       </td>
     </tr>

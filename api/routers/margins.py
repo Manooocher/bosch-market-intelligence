@@ -4,7 +4,7 @@ import logging
 from decimal import Decimal
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, or_
 from db.base import get_session
 from db.models import LatestPrice, WatchListProduct
 
@@ -55,21 +55,38 @@ def _compute_margin(lp: LatestPrice, nabkade_toman: int) -> dict:
 @router.get("")
 async def list_margins(
     page: int = Query(1, ge=1),
-    per_page: int = Query(20, ge=1, le=100),
+    per_page: int | None = Query(None, ge=1, le=1000),
     sort_by: str = Query("margin_vs_min_pct"),
     sort_dir: str = Query("desc"),
+    search: str | None = Query(None),
+    category: str | None = Query(None),
     session: AsyncSession = Depends(get_session),
 ):
-    """Paginated list of products sorted by margin analysis.
+    """List products sorted by margin analysis.
 
     Margins are computed in Python (they derive from nabkade price vs market
-    prices), so all rows are fetched, computed, sorted, then sliced. Sorting is
-    applied over the fully-computed margin values, not raw DB columns.
+    prices), so matching rows are fetched, computed, filtered, sorted, then
+    optionally sliced. By default returns ALL margins (pagination_disabled);
+    pass per_page to opt in to server-side pagination.
     """
+    # Filters applied on raw DB columns (title/sku/category)
+    filters: list = []
+    if search:
+        filters.append(
+            or_(
+                LatestPrice.title.ilike(f"%{search}%"),
+                LatestPrice.sku.ilike(f"%{search}%"),
+            )
+        )
+    if category:
+        filters.append(LatestPrice.category == category)
+
     query = (
         select(WatchListProduct, LatestPrice)
         .join(LatestPrice, WatchListProduct.nabkade_product_id == LatestPrice.nabkade_product_id)
     )
+    if filters:
+        query = query.where(*filters)
 
     result = await session.execute(query)
     rows = result.all()
@@ -93,6 +110,20 @@ async def list_margins(
     margins.sort(key=lambda m: m.get(sort_key, 0), reverse=(sort_dir.lower() != "asc"))
 
     total = len(margins)
+    pagination_disabled = per_page is None
+
+    if pagination_disabled:
+        return {
+            "pagination": {
+                "page": 1,
+                "per_page": total or 1,
+                "total": total,
+                "total_pages": 1,
+            },
+            "pagination_disabled": True,
+            "margins": margins,
+        }
+
     total_pages = max(1, (total + per_page - 1) // per_page)
     start = (page - 1) * per_page
     page_items = margins[start:start + per_page]
@@ -104,5 +135,6 @@ async def list_margins(
             "total": total,
             "total_pages": total_pages,
         },
+        "pagination_disabled": False,
         "margins": page_items,
     }

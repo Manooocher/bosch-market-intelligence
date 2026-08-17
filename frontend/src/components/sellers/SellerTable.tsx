@@ -46,7 +46,6 @@ export function SellerTable({ sellers, isLoading = false }: SellerTableProps) {
             <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">قیمت (ریال)</th>
             <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">امتیاز</th>
             <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">موجودی</th>
-            <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">لینک</th>
           </tr>
         </thead>
         <tbody>
