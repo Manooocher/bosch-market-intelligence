@@ -176,16 +176,17 @@ class MonitorDB:
             """
             INSERT INTO latest_prices (
                 nabkade_product_id, torob_product_id, sku, title,
-                last_fetched_at, seller_count,
+                category, last_fetched_at, seller_count,
                 min_price_rial, max_price_rial,
                 avg_price_rial, median_price_rial,
                 min_price_usd, max_price_usd,
                 avg_price_usd, median_price_usd,
                 competition_score, updated_at
-            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
+            ) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)
             ON CONFLICT (nabkade_product_id) DO UPDATE SET
                 torob_product_id = EXCLUDED.torob_product_id,
                 sku = EXCLUDED.sku, title = EXCLUDED.title,
+                category = EXCLUDED.category,
                 last_fetched_at = EXCLUDED.last_fetched_at,
                 seller_count = EXCLUDED.seller_count,
                 min_price_rial = EXCLUDED.min_price_rial,
@@ -204,6 +205,7 @@ class MonitorDB:
                 data.get("torob_product_id", ""),
                 data.get("sku", ""),
                 data.get("title", ""),
+                data.get("category"),
                 fetched_at,
                 data.get("seller_count", 0),
                 data.get("min_price_rial", 0),

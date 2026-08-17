@@ -8,8 +8,11 @@ V2: Designed for the Torob details API which returns full seller arrays.
 """
 
 import json
+import logging
 import re
 from dataclasses import dataclass, field
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -89,6 +92,52 @@ def _safe_str(value, default: str = "") -> str:
     return str(value).strip()
 
 
+# Min/max prices considered valid for a Bosch appliance in Rial.
+# Below ~100k Rial (10k Toman) is almost certainly a parsing artifact,
+# "تماس بگیرید" (contact for price), or a placeholder. Above 10B Rial
+# (1B Toman) is unrealistically high for a home appliance.
+MIN_VALID_PRICE_RIAL = 100_000
+MAX_VALID_PRICE_RIAL = 10_000_000_000
+
+
+def parse_price(raw_price, strict: bool = True) -> int | None:
+    """Parse a price to Rial, returning None for invalid/suspicious values.
+
+    Args:
+        raw_price: raw price — str (possibly formatted/Persian/Arabic digits),
+            int, float, or None.
+        strict: when True, rejects prices outside [MIN_VALID_PRICE_RIAL,
+            MAX_VALID_PRICE_RIAL]; when False, only rejects non-numeric/zero.
+
+    Returns:
+        Parsed integer Rial price, or None.
+    """
+    if raw_price is None or raw_price == "":
+        return None
+
+    # Numeric inputs passed straight through the digit-normalization parser.
+    parsed = _parse_rial_price(str(raw_price))
+
+    if parsed <= 0:
+        return None
+
+    if strict and parsed < MIN_VALID_PRICE_RIAL:
+        logger.warning(
+            f"Rejecting suspicious low price: {parsed} Rial "
+            f"(raw: {raw_price!r}, type: {type(raw_price).__name__})"
+        )
+        return None
+
+    if strict and parsed > MAX_VALID_PRICE_RIAL:
+        logger.warning(
+            f"Rejecting unrealistically high price: {parsed} Rial "
+            f"(raw: {raw_price!r})"
+        )
+        return None
+
+    return parsed
+
+
 def parse_sellers(product_data: dict, torob_product_id: str) -> SellerParseResult:
     """Parse seller data from a Torob product API response (V1 — backward compatible).
 
@@ -132,11 +181,13 @@ def _parse_single_seller(entry: dict, torob_product_id: str) -> Seller | None:
 
     seller_name = entry.get("shop_name", "") or entry.get("seller_name", "") or entry.get("name", "")
     price_str = entry.get("price", "") or entry.get("price_text", "") or entry.get("sell_price", "")
-    price_rial = _parse_rial_price(str(price_str))
+    price_rial = parse_price(price_str)
+    if price_rial is None:
+        return None
 
     original_price_str = entry.get("original_price", "") or entry.get("original_price_text", "")
-    original_price_rial = _parse_rial_price(str(original_price_str))
-    has_discount = original_price_rial > price_rial > 0 if original_price_rial > 0 else False
+    original_price_rial = parse_price(original_price_str, strict=False) or 0
+    has_discount = original_price_rial > price_rial if original_price_rial > 0 else False
 
     in_stock = True
     if "status" in entry:
@@ -234,18 +285,17 @@ def _parse_single_seller_v2(entry: dict, torob_product_id: str) -> Seller | None
     seller_name = _safe_str(entry.get("shop_name", "") or entry.get("seller_name", ""))
 
     # price_rial: the details API returns price as an integer already in Rials
-    price_rial = _safe_int(entry.get("price", 0))
-    if price_rial <= 0:
+    price_rial = parse_price(entry.get("price", 0))
+    if price_rial is None:
         # Try price_text fallback (some products have text prices)
         price_text = entry.get("price_text", "")
-        price_rial = _parse_rial_price(str(price_text))
-
-    if price_rial <= 0:
+        price_rial = parse_price(price_text)
+    if price_rial is None:
         return None
 
     # original_price for discount detection
-    original_price = _safe_int(entry.get("original_price", 0))
-    has_discount = original_price > price_rial > 0
+    original_price = parse_price(entry.get("original_price", 0), strict=False) or 0
+    has_discount = original_price > price_rial if original_price > 0 else False
 
     # in_stock: availability is a boolean in the details API
     availability = entry.get("availability", True)
