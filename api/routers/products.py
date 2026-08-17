@@ -3,7 +3,7 @@
 import logging
 from decimal import Decimal
 from datetime import datetime, timedelta, timezone
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func, desc, asc, or_
 from db.base import get_session
@@ -155,21 +155,28 @@ async def get_product(
     torob_id: str,
     session: AsyncSession = Depends(get_session),
 ):
-    """Detailed product view with price distribution."""
+    """Detailed product view with price distribution.
+
+    Multiple Nabkade products can map to one Torob listing, so we fetch ALL
+    matching rows and use the one with the highest seller_count as primary
+    (most likely canonical), exposing the duplicates to the client.
+    """
     result = await session.execute(
         select(LatestPrice, WatchListProduct.nabkade_price)
         .outerjoin(WatchListProduct, LatestPrice.nabkade_product_id == WatchListProduct.nabkade_product_id)
         .where(LatestPrice.torob_product_id == torob_id)
     )
-    row = result.one_or_none()
+    rows = result.all()
 
-    if not row:
-        return {"error": "Product not found", "torob_product_id": torob_id}
+    if not rows:
+        raise HTTPException(status_code=404, detail="Product not found")
 
-    product = row[0]
-    nabkade_price = row[1]
+    # Pick primary = row with highest seller_count (canonical / most complete).
+    primary_row = max(rows, key=lambda r: (r[0].seller_count or 0))
+    product = primary_row[0]
+    nabkade_price = primary_row[1]
 
-    # Get sellers for this specific product (via its market snapshots)
+    # Get sellers for this product (via its market snapshots)
     sellers_q = await session.execute(
         select(SellerSnapshot)
         .join(MarketSnapshot, SellerSnapshot.market_snapshot_id == MarketSnapshot.id)
@@ -201,6 +208,12 @@ async def get_product(
             freshness = "stale"
 
     base = _build_product_response(product, nabkade_price)
+
+    # Attach duplicate info when >1 Nabkade product maps to this Torob listing
+    if len(rows) > 1:
+        base["duplicate_nabkade_ids"] = [r[0].nabkade_product_id for r in rows if r[0].nabkade_product_id != product.nabkade_product_id]
+        base["duplicate_skus"] = [r[0].sku for r in rows if r[0].nabkade_product_id != product.nabkade_product_id]
+        base["note"] = f"{len(rows)} Nabkade products map to this Torob listing"
 
     return {
         **base,
