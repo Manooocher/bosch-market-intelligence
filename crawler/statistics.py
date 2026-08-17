@@ -129,3 +129,18 @@ def compute_market_stats(prices_rial: list[int]) -> MarketStats:
         price_dispersion=round(dispersion, 4),
         competition_score=score,
     )
+
+
+def filter_outlier_prices(prices: list[int], outlier_fraction: float = 0.05) -> list[int]:
+    """Drop prices that are < `outlier_fraction` of the median.
+
+    Such prices are almost always crawler parsing artifacts (e.g. a 16-rial
+    price on a ~37M product) and would corrupt min/avg/median. Requires at
+    least 3 samples; otherwise returns the input unchanged.
+    """
+    valid = [p for p in prices if p > 0]
+    if len(valid) < 3:
+        return prices
+    median = calculate_median_price(valid)
+    threshold = median * outlier_fraction
+    return [p for p in prices if p <= 0 or p >= threshold]

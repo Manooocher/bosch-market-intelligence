@@ -1,6 +1,7 @@
 """Products endpoints — list and detail."""
 
 import logging
+import statistics
 from decimal import Decimal
 from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, Query, HTTPException
@@ -11,6 +12,38 @@ from db.models import LatestPrice, SellerSnapshot, MarketSnapshot, WatchListProd
 
 logger = logging.getLogger("api.routers.products")
 router = APIRouter(prefix="/api/products", tags=["products"])
+
+
+def mark_outlier_sellers(sellers: list[dict]) -> list[dict]:
+    """Mark sellers with price < 5% of the median as outliers / unavailable.
+
+    Such prices are almost always crawler parsing artifacts (e.g. a 194-rial
+    price on a ~164M product) and would corrupt min/avg/median if included.
+    Returns the same list mutated in place; sets is_outlier / outlier_reason
+    and forces is_in_stock=False so downstream stats exclude them.
+    """
+    valid_prices = [
+        s["price_rial"] for s in sellers
+        if s.get("is_in_stock", True) and s.get("price_rial", 0) > 0
+    ]
+    if len(valid_prices) < 3:
+        for s in sellers:
+            s["is_outlier"] = False
+        return sellers
+
+    median = statistics.median(valid_prices)
+    threshold = median * 0.05
+
+    for s in sellers:
+        price = s.get("price_rial", 0)
+        if price > 0 and price < threshold:
+            s["is_outlier"] = True
+            s["outlier_reason"] = f"price {price:,} < 5% of median {median:,.0f}"
+            s["is_in_stock"] = False
+        else:
+            s["is_outlier"] = False
+
+    return sellers
 
 
 def _build_product_response(product: LatestPrice, nabkade_price_str: str | None = None) -> dict:
@@ -236,7 +269,7 @@ async def get_sellers(
     torob_id: str,
     session: AsyncSession = Depends(get_session),
 ):
-    """List of sellers for a product, sorted by price."""
+    """List of sellers for a product, sorted by price, outliers marked."""
     result = await session.execute(
         select(SellerSnapshot)
         .join(MarketSnapshot, SellerSnapshot.market_snapshot_id == MarketSnapshot.id)
@@ -252,7 +285,10 @@ async def get_sellers(
             "seller_city": s.seller_city,
             "is_in_stock": s.is_in_stock,
             "is_promoted": s.is_promoted,
+            "seller_page_url": s.offer_url or f"https://torob.com/seller/{s.seller_id}",
         }
         for s in result.scalars().all()
     ]
+    # Mark low-price outliers as unavailable so they don't skew stats.
+    sellers = mark_outlier_sellers(sellers)
     return {"torob_product_id": torob_id, "sellers": sellers}

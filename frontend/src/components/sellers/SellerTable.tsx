@@ -28,10 +28,12 @@ export function SellerTable({ sellers, isLoading = false }: SellerTableProps) {
     );
   }
 
-  // Cheapest = lowest price among in-stock sellers (fall back to all sellers).
+  // Cheapest = lowest price among in-stock, non-outlier sellers.
   const sorted = [...sellers].sort((a, b) => a.price_rial - b.price_rial);
   const cheapestId =
-    sorted.find((s) => s.is_in_stock)?.seller_id ?? sorted[0]?.seller_id ?? null;
+    sorted.find((s) => s.is_in_stock && !s.is_outlier)?.seller_id ??
+    sorted.find((s) => !s.is_outlier)?.seller_id ??
+    null;
 
   return (
     <div className="overflow-x-auto">
@@ -44,6 +46,7 @@ export function SellerTable({ sellers, isLoading = false }: SellerTableProps) {
             <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">قیمت (ریال)</th>
             <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">امتیاز</th>
             <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">موجودی</th>
+            <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">لینک</th>
           </tr>
         </thead>
         <tbody>

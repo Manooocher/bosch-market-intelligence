@@ -55,6 +55,9 @@ export function mapSeller(raw: RawSeller): Seller {
     shop_score: raw.seller_score,
     is_in_stock: raw.is_in_stock,
     is_advertisement: raw.is_promoted,
+    seller_page_url: raw.seller_page_url,
+    is_outlier: raw.is_outlier,
+    outlier_reason: raw.outlier_reason,
   };
 }
 

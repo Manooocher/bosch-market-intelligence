@@ -69,6 +69,9 @@ export interface RawSeller {
   seller_city: string | null;
   is_in_stock: boolean;
   is_promoted: boolean;
+  seller_page_url: string | null;
+  is_outlier: boolean;
+  outlier_reason: string | null;
 }
 
 export interface RawSellersResponse {
@@ -153,6 +156,9 @@ export interface Seller {
   shop_score: number | null; // mapped from raw.seller_score
   is_in_stock: boolean;
   is_advertisement: boolean; // mapped from raw.is_promoted
+  seller_page_url: string | null;
+  is_outlier: boolean;
+  outlier_reason: string | null;
 }
 
 export interface ProductDetail extends ProductListItem {

@@ -20,7 +20,7 @@ from crawler.scheduler import RequestScheduler, WorkItem
 from crawler.circuit_breaker import CircuitBreaker
 from crawler.metrics import MetricsCollector
 from crawler.currency import ExchangeRateFetcher, RialRate, toman_to_usd_cents
-from crawler.statistics import compute_market_stats, MarketStats
+from crawler.statistics import compute_market_stats, MarketStats, filter_outlier_prices
 from crawler.seller_parser import parse_sellers_v2, SellerParseResult
 from crawler.monitor_db import MonitorDB
 
@@ -287,11 +287,12 @@ class DailyMonitor:
                 product_data.sellers = []
                 return product_data
 
-            # Extract prices from in_stock sellers only
+            # Extract prices from in_stock sellers only, dropping low outliers
             prices_rial = [s.price_rial for s in in_stock_sellers if s.price_rial > 0]
             if not prices_rial:
                 product_data.error = "no_valid_prices_in_stock"
                 return product_data
+            prices_rial = filter_outlier_prices(prices_rial)
 
             # Compute market statistics
             stats = compute_market_stats(prices_rial)
