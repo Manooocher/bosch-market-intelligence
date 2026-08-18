@@ -231,3 +231,52 @@ class MatchingLog(Base):
     action = Column(String(50))
     details = Column(Text)
     timestamp = Column(DateTime(timezone=True))
+
+
+# ── Shipments (Phase 7) ─────────────────────────────────────────────────────
+class Shipment(Base):
+    __tablename__ = "shipments"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    name = Column(Text, nullable=False)
+    status = Column(String(20), nullable=False, default="draft")
+    dollar_rate = Column(Numeric)
+    notes = Column(Text)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    finalized_at = Column(DateTime(timezone=True))
+
+    items = relationship("ShipmentItem", back_populates="shipment", cascade="all, delete-orphan")
+    costs = relationship("ShipmentCost", back_populates="shipment", cascade="all, delete-orphan")
+
+
+class ShipmentItem(Base):
+    __tablename__ = "shipment_items"
+    __table_args__ = (Index("idx_shipment_items_shipment", "shipment_id"),)
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    shipment_id = Column(Integer, ForeignKey("shipments.id", ondelete="CASCADE"), nullable=False)
+    nabkade_product_id = Column(String(255))
+    torob_product_id = Column(String(255))
+    sku = Column(String(50))
+    title = Column(Text, nullable=False)
+    quantity = Column(Integer, nullable=False, default=1)
+    unit_purchase_price_usd = Column(Numeric, nullable=False, default=0)
+    allocated_cost_usd = Column(Numeric, default=0)
+    landed_cost_usd = Column(Numeric, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    shipment = relationship("Shipment", back_populates="items")
+
+
+class ShipmentCost(Base):
+    __tablename__ = "shipment_costs"
+    __table_args__ = (Index("idx_shipment_costs_shipment", "shipment_id"),)
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    shipment_id = Column(Integer, ForeignKey("shipments.id", ondelete="CASCADE"), nullable=False)
+    cost_type = Column(String(50), nullable=False)  # shipping|customs|insurance|warehouse|handling|other
+    description = Column(Text)
+    amount_usd = Column(Numeric, nullable=False, default=0)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    shipment = relationship("Shipment", back_populates="costs")

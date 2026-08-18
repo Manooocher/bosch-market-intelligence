@@ -7,7 +7,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from db.base import init_db
-from api.routers import market, products, margins, health
+from api.routers import market, products, margins, health, shipments
 
 logger = logging.getLogger("api")
 
@@ -46,6 +46,7 @@ def create_app() -> FastAPI:
     app.include_router(products.router)
     app.include_router(margins.router)
     app.include_router(health.router)
+    app.include_router(shipments.router)
 
     return app
 
