@@ -183,6 +183,23 @@ async def list_products(
     }
 
 
+@router.get("/categories")
+async def list_categories(session: AsyncSession = Depends(get_session)):
+    """Return distinct categories from latest_prices with product counts."""
+    result = await session.execute(
+        select(LatestPrice.category, func.count(LatestPrice.nabkade_product_id).label("cnt"))
+        .where(LatestPrice.category.isnot(None))
+        .where(LatestPrice.category != "")
+        .group_by(LatestPrice.category)
+        .order_by(desc("cnt"))
+    )
+    categories = [
+        {"category": row[0], "count": row[1]}
+        for row in result.fetchall()
+    ]
+    return {"categories": categories}
+
+
 @router.get("/{torob_id}")
 async def get_product(
     torob_id: str,
