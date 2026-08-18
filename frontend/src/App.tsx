@@ -5,6 +5,9 @@ import { MarketOverviewPage } from './pages/MarketOverviewPage';
 import { ProductsPage } from './pages/ProductsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { MarginsPage } from './pages/MarginsPage';
+import { ShipmentsPage } from './pages/ShipmentsPage';
+import { ShipmentFormPage } from './pages/ShipmentFormPage';
+import { ShipmentDetailPage } from './pages/ShipmentDetailPage';
 import { DataProbe } from './pages/_debug/DataProbe';
 
 const queryClient = new QueryClient({
@@ -29,6 +32,10 @@ export default function App() {
             <Route path="products" element={<ProductsPage />} />
             <Route path="products/:torobId" element={<ProductDetailPage />} />
             <Route path="margins" element={<MarginsPage />} />
+            <Route path="shipments" element={<ShipmentsPage />} />
+            <Route path="shipments/new" element={<ShipmentFormPage />} />
+            <Route path="shipments/:id" element={<ShipmentDetailPage />} />
+            <Route path="shipments/:id/edit" element={<ShipmentFormPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Route>
         </Routes>

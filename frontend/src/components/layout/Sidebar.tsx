@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, Package, DollarSign } from 'lucide-react';
+import { LayoutDashboard, Package, DollarSign, Truck } from 'lucide-react';
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'نمای کلی بازار' },
   { to: '/products', icon: Package, label: 'محصولات' },
   { to: '/margins', icon: DollarSign, label: 'حاشیه سود' },
+  { to: '/shipments', icon: Truck, label: 'محموله‌ها' },
 ];
 
 export function Sidebar() {
