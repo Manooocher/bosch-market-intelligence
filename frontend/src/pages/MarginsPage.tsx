@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMargins } from '../hooks/useMargins';
+import { useCategories } from '../hooks/useCategories';
 import { ProductSearch } from '../components/products/ProductSearch';
 import { CategoryFilter } from '../components/products/CategoryFilter';
 import { ErrorState } from '../components/ui/ErrorState';
@@ -27,26 +28,16 @@ export function MarginsPage() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
 
-  // Fetch ALL margins (server-side sort). Filtering is client-side.
-  const { data, isLoading, error, refetch } = useMargins({ sort_by: 'margin_vs_min_pct', sort_dir: 'desc' });
+  // Server-side filtering + sort. Backend returns all matching margins.
+  const { data, isLoading, error, refetch } = useMargins({
+    sort_by: 'margin_vs_min_pct',
+    sort_dir: 'desc',
+    search: search || undefined,
+    category: category || undefined,
+  });
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return (data?.items ?? []).filter((m) => {
-      if (category && m.category !== category) return false;
-      if (!q) return true;
-      const hay = `${m.title ?? ''} ${m.sku ?? ''}`.toLowerCase();
-      return hay.includes(q);
-    });
-  }, [data, search, category]);
-
-  const availableCategories = useMemo(() => {
-    const set = new Set<string>();
-    (data?.items ?? []).forEach((m) => {
-      if (m.category) set.add(m.category);
-    });
-    return Array.from(set);
-  }, [data]);
+  const { data: categories } = useCategories();
+  const rows = data?.items ?? [];
 
   return (
     <div>
@@ -56,7 +47,7 @@ export function MarginsPage() {
         <div className="flex-1">
           <ProductSearch value={search} onChange={setSearch} />
         </div>
-        <CategoryFilter categories={availableCategories} value={category} onChange={setCategory} />
+        <CategoryFilter categories={categories ?? []} value={category} onChange={setCategory} />
       </div>
 
       {error ? (
@@ -64,7 +55,7 @@ export function MarginsPage() {
       ) : (
         <Card padding="sm">
           <div className="flex items-center justify-between px-4 py-3 text-sm text-slate-500">
-            <span>{filtered.length.toLocaleString('fa-IR')} محصول</span>
+            <span>{rows.length.toLocaleString('fa-IR')} محصول</span>
             {isLoading && <span className="text-indigo-500">در حال بارگذاری…</span>}
           </div>
 
@@ -90,7 +81,7 @@ export function MarginsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((m) => (
+                  {rows.map((m) => (
                     <tr
                       key={m.sku ?? m.torob_product_id}
                       onClick={() => m.torob_product_id && navigate(`/products/${m.torob_product_id}`)}
@@ -128,7 +119,7 @@ export function MarginsPage() {
             </div>
           )}
 
-          {!isLoading && filtered.length === 0 && (
+          {!isLoading && rows.length === 0 && (
             <EmptyState title="موردی یافت نشد" description="هیچ محصولی با این فیلترها وجود ندارد." />
           )}
         </Card>

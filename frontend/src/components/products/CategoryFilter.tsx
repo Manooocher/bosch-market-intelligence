@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
 import { CATEGORY_GROUPS, getCategoryLabel, CategoryGroup } from '../../utils/categories';
+import type { CategoryCount } from '../../api/categories';
 
 interface CategoryFilterProps {
-  categories: string[]; // unique category keys available in the data
-  value: string;        // selected key or '' for "all"
+  categories: CategoryCount[]; // from /api/products/categories
+  value: string;               // selected key or '' for "all"
   onChange: (category: string) => void;
 }
 
@@ -18,16 +19,15 @@ const GROUP_LABELS: Record<CategoryGroup, string> = {
   Other: 'سایر',
 };
 
-/** Grouped category dropdown derived from the categories present in the data. */
+/** Grouped category dropdown fed by the server-side categories endpoint. */
 export function CategoryFilter({ categories, value, onChange }: CategoryFilterProps) {
   const grouped = useMemo(() => {
     const map = new Map<CategoryGroup, string[]>();
     GROUPS.forEach((g) => map.set(g, []));
-    categories.forEach((cat) => {
-      const group = CATEGORY_GROUPS[cat]?.group ?? 'Other';
-      map.get(group)?.push(cat);
+    categories.forEach(({ category }) => {
+      const group = CATEGORY_GROUPS[category]?.group ?? 'Other';
+      map.get(group)?.push(category);
     });
-    // Drop empty groups
     return Array.from(map.entries()).filter(([, cats]) => cats.length > 0);
   }, [categories]);
 

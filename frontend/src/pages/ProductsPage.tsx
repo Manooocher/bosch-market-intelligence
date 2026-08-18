@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import type { SortingState, OnChangeFn, Updater } from '@tanstack/react-table';
 import { useProducts } from '../hooks/useProducts';
+import { useCategories } from '../hooks/useCategories';
 import { ProductTable } from '../components/products/ProductTable';
 import { ProductSearch } from '../components/products/ProductSearch';
 import { CategoryFilter } from '../components/products/CategoryFilter';
@@ -13,34 +14,19 @@ export function ProductsPage() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('');
 
-  // Fetch ALL products (server-side sorting only). The list is virtualized
-  // client-side — no pagination.
+  // Server-side filtering + sorting. The backend returns all matching products
+  // (no pagination); search/category are applied server-side.
   const sort = sorting[0];
   const { data, isLoading, isFetching, error, refetch } = useProducts({
     sort_by: sort?.id ?? 'competition_score',
     sort_dir: sort?.desc ? 'desc' : 'asc',
-    per_page: 1000, // backend cap; returns everything
+    search: search || undefined,
+    category: category || undefined,
   });
 
-  // Client-side filtering (search + category) over the full fetched list.
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    return (data?.items ?? []).filter((p) => {
-      if (category && p.category !== category) return false;
-      if (!q) return true;
-      const hay = `${p.title ?? ''} ${p.sku ?? ''}`.toLowerCase();
-      return hay.includes(q);
-    });
-  }, [data, search, category]);
-
-  // Derive available categories from the raw (unfiltered) list.
-  const availableCategories = useMemo(() => {
-    const set = new Set<string>();
-    (data?.items ?? []).forEach((p) => {
-      if (p.category) set.add(p.category);
-    });
-    return Array.from(set);
-  }, [data]);
+  // Category dropdown from the server-side categories endpoint.
+  const { data: categories } = useCategories();
+  const rows = data?.items ?? [];
 
   const onSortingChange: OnChangeFn<SortingState> = (updaterOrValue: Updater<SortingState>) => {
     const next = typeof updaterOrValue === 'function' ? updaterOrValue(sorting) : updaterOrValue;
@@ -57,7 +43,7 @@ export function ProductsPage() {
           <ProductSearch value={search} onChange={setSearch} />
         </div>
         <CategoryFilter
-          categories={availableCategories}
+          categories={categories ?? []}
           value={category}
           onChange={setCategory}
         />
@@ -68,18 +54,18 @@ export function ProductsPage() {
       ) : (
         <Card padding="sm">
           <div className="flex items-center justify-between px-4 py-3 text-sm text-slate-500">
-            <span>{filtered.length.toLocaleString('fa-IR')} محصول</span>
+            <span>{rows.length.toLocaleString('fa-IR')} محصول</span>
             {isFetching && <span className="text-indigo-500">در حال بارگذاری…</span>}
           </div>
 
           <ProductTable
-            data={filtered}
+            data={rows}
             isLoading={isLoading}
             sorting={sorting}
             onSortingChange={onSortingChange}
           />
 
-          {!isLoading && filtered.length === 0 && (
+          {!isLoading && rows.length === 0 && (
             <EmptyState
               title="محصولی یافت نشد"
               description="تنظیمات جستجو یا فیلتر را تغییر دهید."
