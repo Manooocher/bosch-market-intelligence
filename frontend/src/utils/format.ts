@@ -1,7 +1,17 @@
-export function formatPrice(amount: number | null): string {
+/**
+ * Format a number as a Persian (fa-IR) localized string with digit grouping.
+ * Returns an em-dash placeholder for null/undefined.
+ */
+export function formatPrice(amount: number | null | undefined): string {
   if (amount === null || amount === undefined) return '—';
   return new Intl.NumberFormat('fa-IR').format(amount);
 }
+
+/**
+ * Alias of {@link formatPrice} kept for call-site readability (e.g. counts
+ * vs. prices). Identical behavior.
+ */
+export const formatNumber = formatPrice;
 
 export function formatPercent(value: number | null): string {
   if (value === null || value === undefined) return '—';
@@ -20,9 +30,4 @@ export function formatDate(dateStr: string | null): string {
     hour: '2-digit',
     minute: '2-digit',
   }).format(date);
-}
-
-export function formatNumber(num: number | null | undefined): string {
-  if (num === null || num === undefined) return '—';
-  return new Intl.NumberFormat('fa-IR').format(num);
 }

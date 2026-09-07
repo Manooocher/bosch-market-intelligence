@@ -10,14 +10,7 @@ import {
   Margin,
   RawPagination,
 } from './types';
-
-/** Hours between a timestamp and now (null if unparseable). */
-export function freshnessHours(iso: string | null): number | null {
-  if (!iso) return null;
-  const t = new Date(iso).getTime();
-  if (Number.isNaN(t)) return null;
-  return Math.max(0, Math.round((Date.now() - t) / 3600000));
-}
+import { freshnessHours } from '../utils/date';
 
 /** Map backend pagination to the normalized Paginated<T> shape. */
 export function mapPagination<T>(pagination: RawPagination, items: T[]): Paginated<T> {

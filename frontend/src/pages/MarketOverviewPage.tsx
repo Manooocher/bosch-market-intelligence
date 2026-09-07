@@ -1,20 +1,13 @@
 import { useMarketOverview } from '../hooks/useMarket';
 import { useProducts } from '../hooks/useProducts';
 import { formatNumber, formatDate } from '../utils/format';
+import { freshnessHours } from '../utils/date';
 import { getFreshnessColor } from '../utils/colors';
 import { ErrorState } from '../components/ui/ErrorState';
 import { SkeletonCard } from '../components/ui/Loading';
 import { Card } from '../components/ui/Card';
 import { Package, TrendingUp, Users, Gauge, Clock } from 'lucide-react';
 import { useMemo } from 'react';
-
-/** Hours since last monitor run, or null if unavailable. */
-function freshnessHours(iso: string | null): number | null {
-  if (!iso) return null;
-  const t = new Date(iso).getTime();
-  if (Number.isNaN(t)) return null;
-  return Math.max(0, Math.round((Date.now() - t) / 3600000));
-}
 
 const freshnessLabels: Array<[number, string]> = [
   [24, 'تازه'],
