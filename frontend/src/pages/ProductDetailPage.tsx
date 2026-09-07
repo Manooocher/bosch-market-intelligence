@@ -1,7 +1,6 @@
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import { useProductDetail } from '../hooks/useProductDetail';
-import { useSellers } from '../hooks/useSellers';
 import { ProductDetailHeader } from '../components/products/ProductDetailHeader';
 import { PriceComparisonCards } from '../components/products/PriceComparisonCards';
 import { SellerTable } from '../components/sellers/SellerTable';
@@ -19,11 +18,6 @@ export function ProductDetailPage() {
     error: productError,
     refetch: refetchProduct,
   } = useProductDetail(torobId ?? '');
-
-  const {
-    data: sellers,
-    isLoading: sellersLoading,
-  } = useSellers(torobId ?? '');
 
   if (!torobId) {
     return (
@@ -80,13 +74,13 @@ export function ProductDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="mb-6 lg:mb-0">
           <h2 className="text-lg font-semibold text-slate-800 mb-4">فروشندگان</h2>
-          <SellerTable sellers={sellers ?? []} isLoading={sellersLoading} />
+          <SellerTable sellers={product.sellers ?? []} isLoading={false} />
         </Card>
 
         <Card>
           <h2 className="text-lg font-semibold text-slate-800 mb-4">توزیع قیمت فروشندگان</h2>
           <PriceDistribution
-            sellers={sellers ?? []}
+            sellers={product.sellers ?? []}
             nabkadePriceRial={
               product.margin_vs_min_rial != null && product.market_stats?.min_price_rial != null
                 ? product.margin_vs_min_rial + product.market_stats.min_price_rial
