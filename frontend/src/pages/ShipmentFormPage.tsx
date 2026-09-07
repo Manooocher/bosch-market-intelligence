@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Plus, Trash2, ArrowRight } from 'lucide-react';
+import { Plus, Trash2, ArrowRight, Calculator } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -431,29 +431,46 @@ export function ShipmentFormPage() {
       </Card>
 
       {/* Section 4: Summary */}
-      <Card className="mb-6">
-        <h2 className="text-lg font-semibold text-slate-800 mb-4">خلاصه</h2>
-        <div className="grid grid-cols-3 gap-4 text-sm">
-          <div>
-            <p className="text-slate-500">جمع ارزش محصولات</p>
-            <p className="text-xl font-bold text-slate-800" dir="ltr">
+      <section className="bg-gradient-to-br from-slate-50 to-indigo-50 rounded-xl p-6 border border-slate-200 shadow-sm">
+        <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+          <Calculator className="w-5 h-5 text-indigo-600" />
+          خلاصه محموله
+        </h2>
+
+        <dl className="space-y-3">
+          {/* Row 1: Total Items Value */}
+          <div className="flex items-center justify-between gap-4">
+            <dt className="text-sm text-slate-600 shrink-0">
+              جمع ارزش محصولات:
+            </dt>
+            <dd className="text-sm font-semibold text-slate-800 font-mono" dir="ltr">
               ${formatNumber(totalValue)}
-            </p>
+            </dd>
           </div>
-          <div>
-            <p className="text-slate-500">جمع هزینه‌ها</p>
-            <p className="text-xl font-bold text-slate-800" dir="ltr">
+
+          {/* Row 2: Total Costs */}
+          <div className="flex items-center justify-between gap-4">
+            <dt className="text-sm text-slate-600 shrink-0">
+              جمع هزینه‌ها:
+            </dt>
+            <dd className="text-sm font-semibold text-slate-800 font-mono" dir="ltr">
               ${formatNumber(totalCosts)}
-            </p>
+            </dd>
           </div>
-          <div>
-            <p className="text-slate-500">برآورد کل به ورود</p>
-            <p className="text-xl font-bold text-slate-800" dir="ltr">
-              ${formatNumber(totalValue + totalCosts)}
-            </p>
+
+          {/* Row 3: Total Estimated (visually distinguished) */}
+          <div className="pt-3 mt-3 border-t border-slate-300">
+            <div className="flex items-center justify-between gap-4">
+              <dt className="text-base font-bold text-slate-900 shrink-0">
+                برآورد کل:
+              </dt>
+              <dd className="text-xl font-bold text-indigo-600 font-mono" dir="ltr">
+                ${formatNumber(totalValue + totalCosts)}
+              </dd>
+            </div>
           </div>
-        </div>
-      </Card>
+        </dl>
+      </section>
 
       <div className="flex flex-wrap gap-3">
         <button
