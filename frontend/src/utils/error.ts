@@ -1,9 +1,13 @@
 /**
- * Extract a human-readable Persian-safe error message from an unknown
- * failure (axios / FastAPI shape', fallback string), throwing errors).
- * FastAPI returns {"detail": "..."} on validation/HTTP errors.
+ * Extract a human-readable error message from an unknown thrown value — the
+ * common shapes thrown by axios / FastAPI and plain `Error` instances.
  *
- * @param e the thrown value (axios error object and typically.
+ * Resolution order:
+ *   1. FastAPI validation/HTTP error: `response.data.detail` (string)
+ *   2. Native error: `e.message`
+ *   3. The supplied `fallback` (Persian message) when nothing useful is found
+ *
+ * @param e        the thrown value (axios error object or any error)
  * @param fallback message to return when nothing useful can be extracted
  */
 export function apiErrorMessage(e: unknown, fallback: string): string {

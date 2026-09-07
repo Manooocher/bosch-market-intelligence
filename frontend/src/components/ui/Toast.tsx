@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
 import { CheckCircle2, XCircle, Info, X } from 'lucide-react';
 
+/** Toast visual variant. */
 export type ToastType = 'success' | 'error' | 'info';
 
+/** A single toast notification. */
 export interface ToastData {
   id: number;
   type: ToastType;
@@ -14,6 +16,16 @@ interface ToastProps {
   onClose: (id: number) => void;
 }
 
+/**
+ * A single auto-dismissing toast notification.
+ *
+ * Variants: success (emerald), error (red), info (blue). Auto-dismisses after
+ * 4 seconds via an internal timeout; can also be dismissed manually with the
+ * close button. Rendered with RTL layout.
+ *
+ * @param toast   the toast data to display
+ * @param onClose callback invoked with the toast id when it should be removed
+ */
 export function Toast({ toast, onClose }: ToastProps) {
   useEffect(() => {
     const timer = setTimeout(() => onClose(toast.id), 4000);

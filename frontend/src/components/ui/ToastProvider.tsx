@@ -5,6 +5,16 @@ import { ToastContext, ToastApi } from './toastContext';
 
 let toastId = 0;
 
+/**
+ * React Context provider for the global toast notification system.
+ *
+ * Mounted once in {@link AppLayout}. Exposes a stable {@link ToastApi}
+ * (success/error/info) to every descendant via {@link ToastContext}, and
+ * renders the {@link ToastContainer} so toasts appear fixed in the corner.
+ *
+ * Consumers call `useToast()` (see hooks/useToast) to get the API. Toasts
+ * auto-dismiss after 4s (handled by the Toast component) or via manual close.
+ */
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastData[]>([]);
 
