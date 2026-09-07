@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { lazy } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { AppLayout } from './components/layout/AppLayout';
 import { MarketOverviewPage } from './pages/MarketOverviewPage';
 import { ProductsPage } from './pages/ProductsPage';
@@ -32,23 +33,25 @@ const queryClient = new QueryClient({
 
 export default function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
-          {import.meta.env.DEV && <Route path="/_debug/data" element={<DataProbe />} />}
-          <Route path="/" element={<AppLayout />}>
-            <Route index element={<MarketOverviewPage />} />
-            <Route path="products" element={<ProductsPage />} />
-            <Route path="products/:torobId" element={<ProductDetailPage />} />
-            <Route path="margins" element={<MarginsPage />} />
-            <Route path="shipments" element={<ShipmentsPage />} />
-            <Route path="shipments/new" element={<ShipmentFormPage />} />
-            <Route path="shipments/:id" element={<ShipmentDetailPage />} />
-            <Route path="shipments/:id/edit" element={<ShipmentFormPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <Routes>
+            {import.meta.env.DEV && <Route path="/_debug/data" element={<DataProbe />} />}
+            <Route path="/" element={<AppLayout />}>
+              <Route index element={<MarketOverviewPage />} />
+              <Route path="products" element={<ProductsPage />} />
+              <Route path="products/:torobId" element={<ProductDetailPage />} />
+              <Route path="margins" element={<MarginsPage />} />
+              <Route path="shipments" element={<ShipmentsPage />} />
+              <Route path="shipments/new" element={<ShipmentFormPage />} />
+              <Route path="shipments/:id" element={<ShipmentDetailPage />} />
+              <Route path="shipments/:id/edit" element={<ShipmentFormPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
