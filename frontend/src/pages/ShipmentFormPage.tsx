@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Trash2, ArrowRight } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useShipment } from '../hooks/useShipments';
-import { shipmentsApi, ShipmentItemInput, ShipmentCostInput, CostType } from '../api/shipments';
+import { shipmentsApi, ShipmentItemInput, ShipmentCostInput, ShipmentCreateInput, CostType } from '../api/shipments';
+import { useToast } from '../hooks/useToast';
+import { apiErrorMessage } from '../utils/error';
 import { COST_TYPE_LABELS, COST_TYPES } from '../utils/shipmentCosts';
 import { Card } from '../components/ui/Card';
 import { ErrorState } from '../components/ui/ErrorState';
@@ -33,6 +36,8 @@ function emptyCost(): CostRow {
 
 export function ShipmentFormPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const toast = useToast();
   const { id } = useParams<{ id: string }>();
   const shipmentId = id ? Number(id) : null;
   const isEdit = shipmentId != null && !Number.isNaN(shipmentId);
@@ -43,7 +48,6 @@ export function ShipmentFormPage() {
   const [notes, setNotes] = useState('');
   const [items, setItems] = useState<ItemRow[]>([emptyItem()]);
   const [costs, setCosts] = useState<CostRow[]>([emptyCost()]);
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // Load existing data in edit mode
@@ -100,33 +104,33 @@ export function ShipmentFormPage() {
       })),
   });
 
-  const save = async (finalize: boolean) => {
+  const saveMutation = useMutation({
+    mutationFn: async ({ payload, finalize }: { payload: ShipmentCreateInput; finalize: boolean }) => {
+      const created = isEdit
+        ? await shipmentsApi.update(shipmentId as number, payload)
+        : await shipmentsApi.create(payload);
+      if (finalize && created.id) {
+        await shipmentsApi.finalize(created.id);
+      }
+      return created;
+    },
+    onSuccess: (created) => {
+      toast.success(isEdit ? 'محموله با موفقیت به‌روزرسانی شد' : 'محموله با موفقیت ایجاد شد');
+      queryClient.invalidateQueries({ queryKey: ['shipments'] });
+      navigate(`/shipments/${created.id}`);
+    },
+    onError: (err: unknown) => {
+      toast.error(apiErrorMessage(err, 'خطا در ذخیره محموله'));
+    },
+  });
+
+  const handleSave = (finalize: boolean) => {
     if (!valid) {
       setError('لطفاً نام محموله و حداقل یک محصول را وارد کنید.');
       return;
     }
-    setSubmitting(true);
     setError(null);
-    try {
-      const payload = buildPayload();
-      let created;
-      if (isEdit) {
-        created = await shipmentsApi.update(shipmentId as number, payload);
-      } else {
-        created = await shipmentsApi.create(payload);
-      }
-      const targetId = created.id;
-      if (finalize) {
-        await shipmentsApi.finalize(targetId);
-      }
-      navigate(`/shipments/${targetId}`);
-    } catch (e: unknown) {
-      const detail =
-        (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail ??
-        'خطا در ذخیره محموله';
-      setError(detail);
-      setSubmitting(false);
-    }
+    saveMutation.mutate({ payload: buildPayload(), finalize });
   };
 
   if (isEdit && loadingExisting) {
@@ -359,18 +363,18 @@ export function ShipmentFormPage() {
 
       <div className="flex flex-wrap gap-3">
         <button
-          onClick={() => save(false)}
-          disabled={submitting}
+          onClick={() => handleSave(false)}
+          disabled={saveMutation.isPending}
           className="px-5 py-2.5 bg-white border border-indigo-600 text-indigo-600 hover:bg-indigo-50 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
         >
-          ذخیره پیش‌نویس
+          {saveMutation.isPending ? 'در حال ذخیره...' : 'ذخیره پیش‌نویس'}
         </button>
         <button
-          onClick={() => save(true)}
-          disabled={submitting}
+          onClick={() => handleSave(true)}
+          disabled={saveMutation.isPending}
           className="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
         >
-          ذخیره و نهایی‌سازی
+          {saveMutation.isPending ? 'در حال ذخیره...' : 'ذخیره و نهایی‌سازی'}
         </button>
         <button
           onClick={() => navigate('/shipments')}
