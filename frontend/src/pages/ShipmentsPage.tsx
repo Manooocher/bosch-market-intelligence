@@ -79,12 +79,12 @@ export function ShipmentsPage() {
                 <thead className="bg-slate-50">
                   <tr className="border-b border-slate-200">
                     <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">نام</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">وضعیت</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">اقلام</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">ارزش کل ($)</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">هزینه‌ها ($)</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-500">وضعیت</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-500">اقلام</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-500">ارزش کل ($)</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-500">هزینه‌ها ($)</th>
                     <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">تاریخ</th>
-                    <th className="px-4 py-3 text-right text-xs font-semibold text-slate-500">عملیات</th>
+                    <th className="px-4 py-3 text-center text-xs font-semibold text-slate-500">عملیات</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -95,20 +95,22 @@ export function ShipmentsPage() {
                       onClick={() => navigate(`/shipments/${s.id}`)}
                     >
                       <td className="px-4 py-3 font-medium text-slate-800">{s.name}</td>
-                      <td className="px-4 py-3">
+                      <td className="px-4 py-3 text-center">
                         <Badge variant={s.status === 'finalized' ? 'success' : 'warning'}>
                           {s.status === 'finalized' ? 'نهایی شده' : 'پیش‌نویس'}
                         </Badge>
                       </td>
-                      <td className="px-4 py-3 text-slate-600">{s.item_count}</td>
-                      <td className="px-4 py-3 text-slate-700" dir="ltr">
+                      <td className="px-4 py-3 text-center text-slate-600 font-medium font-mono" dir="ltr">
+                        {s.item_count}
+                      </td>
+                      <td className="px-4 py-3 text-center text-slate-700 font-medium font-mono" dir="ltr">
                         {formatNumber(s.total_value_usd)}
                       </td>
-                      <td className="px-4 py-3 text-slate-700" dir="ltr">
+                      <td className="px-4 py-3 text-center text-slate-700 font-medium font-mono" dir="ltr">
                         {formatNumber(s.total_costs_usd)}
                       </td>
-                      <td className="px-4 py-3 text-slate-500">{formatDate(s.created_at)}</td>
-                      <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                      <td className="px-4 py-3 text-right text-slate-500">{formatDate(s.created_at)}</td>
+                      <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => navigate(`/shipments/${s.id}`)}
