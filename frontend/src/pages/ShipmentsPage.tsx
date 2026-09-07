@@ -1,7 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { Plus, Pencil, Trash2, Eye } from 'lucide-react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useShipments } from '../hooks/useShipments';
 import { shipmentsApi } from '../api/shipments';
+import { useToast } from '../hooks/useToast';
+import { apiErrorMessage } from '../utils/error';
 import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { ErrorState } from '../components/ui/ErrorState';
@@ -10,12 +13,24 @@ import { formatNumber, formatDate } from '../utils/format';
 
 export function ShipmentsPage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const toast = useToast();
   const { data, isLoading, error, refetch } = useShipments();
 
-  const handleDelete = async (id: number) => {
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => shipmentsApi.delete(id),
+    onSuccess: () => {
+      toast.success('محموله با موفقیت حذف شد');
+      queryClient.invalidateQueries({ queryKey: ['shipments'] });
+    },
+    onError: (err: unknown) => {
+      toast.error(apiErrorMessage(err, 'خطا در حذف محموله'));
+    },
+  });
+
+  const handleDelete = (id: number) => {
     if (!window.confirm('آیا از حذف این محموله مطمئن هستید؟')) return;
-    await shipmentsApi.delete(id);
-    refetch();
+    deleteMutation.mutate(id);
   };
 
   return (
@@ -101,7 +116,8 @@ export function ShipmentsPage() {
                               </button>
                               <button
                                 onClick={() => handleDelete(s.id)}
-                                className="p-1.5 rounded hover:bg-red-50 text-red-500"
+                                disabled={deleteMutation.isPending}
+                                className="p-1.5 rounded hover:bg-red-50 text-red-500 disabled:opacity-40 disabled:cursor-not-allowed"
                                 title="حذف"
                               >
                                 <Trash2 className="w-4 h-4" />
