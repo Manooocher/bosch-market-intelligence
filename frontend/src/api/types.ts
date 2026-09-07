@@ -115,7 +115,7 @@ export interface RawMarketOverview {
   avg_competition_score: number;
   usd_irt_rate: number;
   usd_irt_source: string;
-  usd_irt_updated_at: string;
+  usd_irt_updated_at: string | null; // null when falling back (no monitor data)
   last_monitor_run: RawLastMonitorRun | null;
 }
 
@@ -182,7 +182,7 @@ export interface MarketOverview {
 export interface ExchangeRate {
   rate: number;
   source: string;
-  fetched_at: string;
+  fetched_at: string | null; // null when the backend fell back to a default rate
 }
 
 // FastAPI standard error shape: {"detail": "message"}
