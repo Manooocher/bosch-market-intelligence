@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { Plus, Pencil, Trash2, Eye } from 'lucide-react';
+import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useShipments } from '../hooks/useShipments';
 import { shipmentsApi } from '../api/shipments';
@@ -9,6 +10,7 @@ import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { ErrorState } from '../components/ui/ErrorState';
 import { EmptyState } from '../components/ui/EmptyState';
+import { ConfirmModal } from '../components/ui';
 import { formatNumber, formatDate } from '../utils/format';
 
 export function ShipmentsPage() {
@@ -16,6 +18,8 @@ export function ShipmentsPage() {
   const queryClient = useQueryClient();
   const toast = useToast();
   const { data, isLoading, error, refetch } = useShipments();
+
+  const [deleteTarget, setDeleteTarget] = useState<number | null>(null);
 
   const deleteMutation = useMutation({
     mutationFn: (id: number) => shipmentsApi.delete(id),
@@ -28,10 +32,18 @@ export function ShipmentsPage() {
     },
   });
 
-  const handleDelete = (id: number) => {
-    if (!window.confirm('آیا از حذف این محموله مطمئن هستید؟')) return;
-    deleteMutation.mutate(id);
+  const handleDeleteClick = (id: number) => {
+    setDeleteTarget(id);
   };
+
+  const handleDeleteConfirm = () => {
+    if (deleteTarget != null) {
+      deleteMutation.mutate(deleteTarget);
+    }
+    setDeleteTarget(null);
+  };
+
+  const handleDeleteCancel = () => setDeleteTarget(null);
 
   return (
     <div>
@@ -115,7 +127,7 @@ export function ShipmentsPage() {
                                 <Pencil className="w-4 h-4" />
                               </button>
                               <button
-                                onClick={() => handleDelete(s.id)}
+                                onClick={() => handleDeleteClick(s.id)}
                                 disabled={deleteMutation.isPending}
                                 className="p-1.5 rounded hover:bg-red-50 text-red-500 disabled:opacity-40 disabled:cursor-not-allowed"
                                 title="حذف"
@@ -134,6 +146,17 @@ export function ShipmentsPage() {
           )}
         </Card>
       )}
+      <ConfirmModal
+        isOpen={deleteTarget != null}
+        title="حذف محموله"
+        message="آیا از حذف این محموله مطمئن هستید؟ این عملیات غیرقابل بازگشت است."
+        confirmLabel="حذف"
+        cancelLabel="انصراف"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </div>
   );
 }

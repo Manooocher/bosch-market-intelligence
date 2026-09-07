@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowRight, Trash2 } from 'lucide-react';
+import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useShipment } from '../hooks/useShipments';
 import { shipmentsApi } from '../api/shipments';
@@ -9,6 +10,7 @@ import { Card } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { ErrorState } from '../components/ui/ErrorState';
 import { Spinner } from '../components/ui/Loading';
+import { ConfirmModal } from '../components/ui';
 import { formatNumber, formatDate } from '../utils/format';
 import { COST_TYPE_LABELS } from '../utils/shipmentCosts';
 import type { ShipmentItemResult } from '../api/shipments';
@@ -61,6 +63,8 @@ export function ShipmentDetailPage() {
   const queryClient = useQueryClient();
   const toast = useToast();
 
+  const [deleteOpen, setDeleteOpen] = useState(false);
+
   const { data: shipment, isLoading, error, refetch } = useShipment(shipmentId);
 
   const finalizeMutation = useMutation({
@@ -89,14 +93,21 @@ export function ShipmentDetailPage() {
 
   const handleDelete = () => {
     if (!shipment || shipment.status !== 'draft') return;
-    if (!window.confirm('آیا از حذف این محموله مطمئن هستید؟')) return;
-    deleteMutation.mutate(shipment.id);
+    setDeleteOpen(true);
   };
 
   const handleFinalize = () => {
     if (!shipment) return;
     finalizeMutation.mutate(shipment.id);
   };
+
+  const handleDeleteConfirm = () => {
+    if (!shipment) return;
+    deleteMutation.mutate(shipment.id);
+    setDeleteOpen(false);
+  };
+
+  const handleDeleteCancel = () => setDeleteOpen(false);
 
   if (isLoading) {
     return <Spinner size="lg" />;
@@ -247,6 +258,18 @@ export function ShipmentDetailPage() {
           </div>
         )}
       </Card>
+
+      <ConfirmModal
+        isOpen={deleteOpen && shipment.status === 'draft'}
+        title="حذف محموله"
+        message="آیا از حذف این محموله مطمئن هستید؟ این عملیات غیرقابل بازگشت است."
+        confirmLabel="حذف"
+        cancelLabel="انصراف"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+      />
     </div>
   );
 }
