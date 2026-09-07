@@ -14,15 +14,8 @@ export function Header({ onMenuClick }: HeaderProps) {
   return (
     <header className="bg-white border-b border-slate-200 px-4 py-4 md:px-6">
       <div className="flex items-center justify-between">
+        {/* Exchange rate chip — FIRST flex child → RIGHT in RTL. */}
         <div className="flex items-center gap-4">
-          {/* Hamburger menu — mobile only. */}
-          <button
-            onClick={onMenuClick}
-            className="md:hidden p-2 -ml-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
-            aria-label="باز کردن منو"
-          >
-            <Menu className="w-6 h-6" />
-          </button>
           <div className="flex items-center gap-6">
             {isLoading ? (
               <div className="h-8 w-48 bg-slate-200 rounded animate-pulse" />
@@ -37,6 +30,16 @@ export function Header({ onMenuClick }: HeaderProps) {
             ) : null}
           </div>
         </div>
+
+        {/* Hamburger menu — LAST flex child → LEFT in RTL (mobile only). */}
+        <button
+          onClick={onMenuClick}
+          className="md:hidden p-2 -ml-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors"
+          aria-label="باز کردن منو"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+
         <div className="flex items-center gap-2 text-sm text-slate-500">
           <Clock className="w-4 h-4" />
           <span>آپدیت هر ۴ روز</span>

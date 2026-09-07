@@ -38,10 +38,13 @@ export function AppLayout() {
         {/* Sidebar — static on md+, slide-in drawer on mobile. */}
         <aside
           className={`
-            fixed md:static inset-y-0 left-0 z-50
+            fixed md:static inset-y-0 right-0 z-50
+            w-64 bg-white border-l border-slate-200
             transform transition-transform duration-300 ease-in-out
-            ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+            ${sidebarOpen ? 'translate-x-0' : 'translate-x-[100%] md:translate-x-0'}
           `}
+          aria-label="منوی ناوبری"
+          role="navigation"
         >
           <Sidebar onClose={() => setSidebarOpen(false)} />
         </aside>
