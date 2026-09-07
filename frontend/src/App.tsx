@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { lazy } from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AppLayout } from './components/layout/AppLayout';
 import { MarketOverviewPage } from './pages/MarketOverviewPage';
@@ -8,7 +9,15 @@ import { MarginsPage } from './pages/MarginsPage';
 import { ShipmentsPage } from './pages/ShipmentsPage';
 import { ShipmentFormPage } from './pages/ShipmentFormPage';
 import { ShipmentDetailPage } from './pages/ShipmentDetailPage';
-import { DataProbe } from './pages/_debug/DataProbe';
+
+// DataProbe is a developer-only diagnostics page. Imported dynamically and
+// gated behind import.meta.env.DEV so Vite prunes it from the production
+// bundle (dev servers still get /_debug/data; prod builds omit it entirely).
+// The lazy fallback branch keeps the type a valid JSX component and is itself
+// dead-code eliminated by the `false && ...` route guard below in prod.
+const DataProbe = import.meta.env.DEV
+  ? lazy(() => import('./pages/_debug/DataProbe').then((m) => ({ default: m.DataProbe })))
+  : lazy(() => Promise.resolve({ default: () => null }));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,7 +35,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
-          <Route path="/_debug/data" element={<DataProbe />} />
+          {import.meta.env.DEV && <Route path="/_debug/data" element={<DataProbe />} />}
           <Route path="/" element={<AppLayout />}>
             <Route index element={<MarketOverviewPage />} />
             <Route path="products" element={<ProductsPage />} />
