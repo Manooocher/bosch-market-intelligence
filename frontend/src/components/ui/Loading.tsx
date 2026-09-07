@@ -1,15 +1,3 @@
-export function SkeletonRow({ cols = 6 }: { cols?: number }) {
-  return (
-    <tr>
-      {Array.from({ length: cols }).map((_, i) => (
-        <td key={i} className="px-4 py-3">
-          <div className="h-4 bg-slate-200 rounded animate-pulse" style={{ width: `${60 + Math.random() * 40}%` }} />
-        </td>
-      ))}
-    </tr>
-  );
-}
-
 export function SkeletonCard() {
   return (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-4">
@@ -42,7 +30,13 @@ export function TableSkeleton({ rows = 5, cols = 6 }: { rows?: number; cols?: nu
   return (
     <tbody>
       {Array.from({ length: rows }).map((_, i) => (
-        <SkeletonRow key={i} cols={cols} />
+        <tr key={i}>
+          {Array.from({ length: cols }).map((__, j) => (
+            <td key={j} className="px-4 py-3">
+              <div className="h-4 bg-slate-200 rounded animate-pulse" style={{ width: `${60 + Math.random() * 40}%` }} />
+            </td>
+          ))}
+        </tr>
       ))}
     </tbody>
   );
