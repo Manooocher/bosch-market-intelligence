@@ -52,7 +52,7 @@ The Torob Intelligence Platform automatically tracks market prices for ~450 Bosc
 
 ```bash
 # Clone repository
-git clone https://github.com/username/torob-int.git
+git clone https://github.com/Manooocher/bosch-market-intelligence.git
 cd torob-int
 
 # Create virtual environment
