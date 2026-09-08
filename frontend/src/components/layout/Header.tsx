@@ -26,6 +26,11 @@ export function Header({ onMenuClick }: HeaderProps) {
                 <span className="font-semibold text-slate-800">
                   {formatPrice(rate.rate)} ریال
                 </span>
+                {rate.source && (
+                  <span className="text-xs text-slate-400">
+                    ({rate.source === 'tabdeal-live' ? 'لحظه‌ای' : rate.source === 'tabdeal-cached' ? 'کش' : 'آفلاین'})
+                  </span>
+                )}
               </div>
             ) : null}
           </div>
