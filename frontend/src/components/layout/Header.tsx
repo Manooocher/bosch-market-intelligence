@@ -14,7 +14,16 @@ export function Header({ onMenuClick }: HeaderProps) {
   return (
     <header className="bg-white border-b border-slate-200 px-4 py-4 md:px-6">
       <div className="flex items-center justify-between gap-3">
-        {/* ── RIGHT SIDE (first flex child in RTL) ───────────────────── */}
+        {/* ── FIRST child → RIGHT in RTL — hamburger, mobile only ── */}
+        <button
+          onClick={onMenuClick}
+          className="md:hidden p-2 -ml-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+          aria-label="باز کردن منو"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+
+        {/* ── LAST child → LEFT in RTL ──────────────────────────────── */}
         <div className="flex flex-col gap-1">
           {/* Exchange rate (always visible) */}
           <div className="flex items-center gap-2 text-sm">
@@ -25,7 +34,7 @@ export function Header({ onMenuClick }: HeaderProps) {
             ) : rate ? (
               <span className="font-semibold text-slate-800" dir="ltr">
                 {formatPrice(rate.rate)}
-                <span className="text-xs text-slate-500 mr-1">ریال</span>
+                <span className="text-xs text-slate-500 ml-1">ریال</span>
               </span>
             ) : (
               <span className="text-slate-400">—</span>
@@ -43,15 +52,6 @@ export function Header({ onMenuClick }: HeaderProps) {
             <span>آپدیت هر ۴ روز</span>
           </div>
         </div>
-
-        {/* ── LEFT SIDE (last flex child in RTL) — hamburger, mobile only ── */}
-        <button
-          onClick={onMenuClick}
-          className="md:hidden p-2 -mr-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"
-          aria-label="باز کردن منو"
-        >
-          <Menu className="w-6 h-6" />
-        </button>
       </div>
     </header>
   );
